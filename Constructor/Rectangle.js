@@ -1,5 +1,5 @@
 ﻿/*
-    矩形类
+    矩形对象构造器
 */
 void function (TeaJs) {
     "use strict";

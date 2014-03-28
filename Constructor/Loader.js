@@ -1,5 +1,5 @@
 ﻿/*
-    加载器类
+    加载器对象构造器
 */
 void function (TeaJs) {
     "use strict";

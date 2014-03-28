@@ -3,16 +3,16 @@
 */
 void function (window) {
     // 让不支持Html5标签的浏览器识别Html5标签
-    var list = "abbr article aside audio bdi canvas data datalist details dialog figcaption figure footer header hgroup main mark meter nav output progress section summary template time video".split(' ');
+    var list = "abbr article aside audio bdi data datalist details dialog figcaption figure footer header hgroup main mark meter nav output progress section summary template time video".split(' ');
     for (var len = list.length; len--;) { document.createElement(list[len]); }
 
-    window.addEventListener = window.addEventListener || function (type, listener) {
+    window.addEventListener = (window.addEventListener || function (type, listener) {
         /// <summary>添加事件监听器</summary>
         /// <param name="type" type="String">事件类型</param>
         /// <param name="listener" type="EventListener">侦听函数</param>
 
         window.attachEvent("on" + type, listener);
-    };
+    });
 
     // 性能
     window.performance = window.performance ||

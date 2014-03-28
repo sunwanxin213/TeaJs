@@ -1,5 +1,5 @@
 ﻿/*
-    渲染器类
+    渲染器对象构造器
 */
 void function (TeaJs) {
     "use strict";

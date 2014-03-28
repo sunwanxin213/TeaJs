@@ -1,5 +1,5 @@
 ﻿/*
-    3D向量类
+    3D向量对象构造器
 */
 void function (TeaJs) {
     "use strict";

@@ -1,5 +1,5 @@
 ﻿/*
-    内容管理器类
+    内容管理器
 */
 void function (TeaJs) {
     "use strict";

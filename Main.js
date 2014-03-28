@@ -13,7 +13,7 @@ void function (window) {
         // 工具文件列表
         ["Tools", "MathHelper", "Color", "Bounds", "Lzw"],
         // 渲染器文件列表
-        ["Renderer", "Canvas2D", "Svg2D"],
+        ["Renderer", "Canvas2D", "Svg2D", "WebGL3D"],
         // 输入设备文件列表
         ["Input", "Mouse", "Touch", "Keyboard", "Media"],
         // 加载器文件列表

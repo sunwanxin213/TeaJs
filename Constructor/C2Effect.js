@@ -1,5 +1,5 @@
 ﻿/*
-    Canvas2D效果
+    Canvas2D效果对象构造器
 */
 void function (TeaJs) {
     "use strict";
