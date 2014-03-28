@@ -9,7 +9,7 @@ void function (TeaJs) {
         /// <returns type="ShaderLoader">着色器加载器对象</returns>
 
         // 获得加载器构造器属性
-        TeaJs.Loader.call(this, "Shader", "vs fs".split(" "));
+        TeaJs.Loader.call(this, "Shader", "glvs glfs".split(" "));
     }
 
     // 获得加载器构造器函数

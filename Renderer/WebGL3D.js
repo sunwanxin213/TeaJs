@@ -76,8 +76,8 @@ void function (TeaJs) {
             });
         }
 
-        loadEffect("baseEffect.vs", "VERTEX_SHADER", function (vs) {
-            loadEffect("baseEffect.fs", "FRAGMENT_SHADER", function (fs) {
+        loadEffect("baseEffect.glvs", "VERTEX_SHADER", function (vs) {
+            loadEffect("baseEffect.glfs", "FRAGMENT_SHADER", function (fs) {
                 _this.baseEffect = _this.getProgram(vs, fs);
             });
         });
