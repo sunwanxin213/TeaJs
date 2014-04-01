@@ -11,6 +11,8 @@ void function (TeaJs) {
         if (!arguments.length) return;
         constructor(this, arguments);
 
+        var _this = this;
+
         // 宽高比
         this.ratio = this.width / this.height;
 
@@ -19,6 +21,13 @@ void function (TeaJs) {
 
         // 禁止拖拽
         this.canvas.setAttribute("draggable", "false");
+
+        var isAutoSize = false;
+        // 是否自动缩放属性
+        Object.defineProperty(this, "autoSize", {
+            get: function () { return isAutoSize; },
+            set: function (value) { if (isAutoSize != (value = !!value)) autoSize(_this, isAutoSize = value); }
+        });
 
         // 输出调试信息
         if (TeaJs.isDebug && this.canvas.id) {
@@ -88,12 +97,24 @@ void function (TeaJs) {
         throw new Error(this.rendererMode + " Function \"clear\" is not implemented.");
     };
 
-    renderer.autoSize = function (isAuto) {
+    renderer.resize = function (w, h) {
+        /// <summary>重新设置尺寸</summary>
+        /// <param name="w" type="Number">宽度</param>
+        /// <param name="h" type="Number">高度</param>
+
+        var c = renderer.canvas;
+
+        this.width = c.width = w;
+        this.height = c.height = h;
+    };
+
+    function autoSize(renderer, isAuto) {
         /// <summary>自动调整尺寸</summary>
+        /// <param name="renderer" type="Render">SvgRenderer或CanvasRenderer</param>
         /// <param name="isAuto" type="Boolean">是否启用自动调整</param>
 
-        var _this = this;
-        var pe = (this.canvas.parentElement || this.canvas.parentNode || document.body);
+        var _this = renderer;
+        var pe = (renderer.canvas.parentElement || renderer.canvas.parentNode || document.body);
 
         function resize() {
             var c = _this.canvas,
@@ -142,17 +163,6 @@ void function (TeaJs) {
         } else {
             window.removeEventListener("resize", resize, false);
         }
-    };
-
-    renderer.resize = function (w, h) {
-        /// <summary>重新设置尺寸</summary>
-        /// <param name="w" type="Number">宽度</param>
-        /// <param name="h" type="Number">高度</param>
-
-        var c = this.canvas;
-
-        this.width = c.width = w;
-        this.height = c.height = h;
     };
 
     TeaJs.Renderer = Renderer;
