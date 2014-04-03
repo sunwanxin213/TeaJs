@@ -87,12 +87,9 @@ void function (TeaJs) {
         /// <param name="font" type="String" optional="true">字体</param>
         /// <returns type="Number">宽度</returns>
 
-        var ctx = this.context;
-        var tempFont = ctx.font;
-        ctx.font = tolerantFont(font) || tempFont;
-        var width = ctx.measureText(str).width;
-        ctx.font = tempFont;
-        return width;
+        textMetricElement.style.font = tolerantFont(font) || this.context.font;
+        textMetricElement.textContent = str;
+        return textMetricElement.offsetWidth;
     };
 
     renderer.getTextSize = function (str, font) {
@@ -584,11 +581,17 @@ void function (TeaJs) {
         /// <param name="font" type="String" optional="true">字体</param>
 
         var ctx = this.context;
+        var _this = this;
 
         this.useConvert(null, null, null, null, function () {
             ctx.strokeStyle = color || "#000000";
             ctx.font = tolerantFont(font) || "Bold 14px Arial";
-            ctx.strokeText(text, x, y);
+
+            var fontHeight = _this.getTextHeight(text, font);
+            var strList = text.split("\r\n");
+            for (var i = 0; i < strList.length; i++) {
+                ctx.strokeText(strList[i], x, y + fontHeight * i);
+            }
         });
     };
 
@@ -601,11 +604,17 @@ void function (TeaJs) {
         /// <param name="font" type="String" optional="true">字体</param>
 
         var ctx = this.context;
+        var _this = this;
 
         this.useConvert(null, null, null, null, function () {
             ctx.fillStyle = color || "#000000";
             ctx.font = tolerantFont(font) || "Bold 14px Arial";
-            ctx.fillText(text, x, y);
+
+            var fontHeight = _this.getTextHeight(text, font);
+            var strList = text.split("\r\n");
+            for (var i = 0; i < strList.length; i++) {
+                ctx.fillText(strList[i], x, y + fontHeight * i);
+            }
         });
     };
 
