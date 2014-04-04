@@ -56,7 +56,7 @@ void function (TeaJs) {
         this.context.clearRect(0, 0, this.width, this.height);
     };
 
-    Canvas2D.crateBufferRenderer = renderer.crateBufferRenderer = function (width, height) {
+    Canvas2D.createBufferRenderer = renderer.createBufferRenderer = function (width, height) {
         /// <summary>创建缓冲渲染器</summary>
         /// <param name="width" type="Number">画布宽度</param>
         /// <param name="height" type="Number">画布高度</param>
