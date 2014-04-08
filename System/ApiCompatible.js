@@ -39,14 +39,17 @@ void function (window) {
                         navigator.msBattery;
 
     // 游戏手柄
-    navigator.gamepads = navigator.msGamepads ||
-                         navigator.webkitGamepads ||
-                         navigator.mozGamepads ||
-                         navigator.gamepads ||
-                         (navigator.msGetGamepads && navigator.msGetGamepads()) ||
-                         (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) ||
-                         (navigator.mozGetGamepads && navigator.mozGetGamepads()) ||
-                         (navigator.getGamepads && navigator.getGamepads());
+    if (!navigator.getGamepads) {
+        navigator.getGamepads = function () {
+            return (navigator.msGetGamepads && navigator.msGetGamepads()) ||
+                   (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) ||
+                   (navigator.mozGetGamepads && navigator.mozGetGamepads())||
+                   navigator.msGamepads ||
+                   navigator.webkitGamepads ||
+                   navigator.mozGamepads ||
+                   navigator.gamepads;
+        };
+    }
 
     // Url操作
     window.URL = window.URL || window.webkitURL;

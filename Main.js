@@ -15,7 +15,7 @@ void function (window) {
         // 渲染器文件列表
         ["Renderer", "Canvas2D", "Svg2D", "WebGL3D"],
         // 输入设备文件列表
-        ["Input", "Mouse", "Touch", "Keyboard", "Media"],
+        ["Input", "Mouse", "Touch", "Keyboard", "Media", "Gamepad"],
         // 加载器文件列表
         ["Loader", "Texture", "TextureDds", "Video", "Audio", "Shader", "ObjModel", "FrameAnimation", "TileMap"],
         // 语音操作文件列表
