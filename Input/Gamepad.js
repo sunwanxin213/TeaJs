@@ -27,7 +27,9 @@ void function (TeaJs) {
                     var controller = controllers[j];
                     if (!controller) continue;
                     list[controller.index] = {
+                        // 设备名称
                         id: controller.id,
+                        // 按钮列表
                         buttons: function () {
                             var btnList = [];
                             for (var i = 0; i < controller.buttons.length; i++) {
@@ -42,6 +44,7 @@ void function (TeaJs) {
                             }
                             return btnList;
                         }(),
+                        // 摇杆列表
                         axes: function () {
                             var axeList = [];
                             var num = 0;
