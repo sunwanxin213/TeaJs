@@ -26,6 +26,29 @@ void function () {
     // 屏幕管理器原型对象
     var s = Screen.prototype;
 
+    s.lockDirection = function (direction) {
+        /// <summary>锁定屏幕方向</summary>
+        /// <param name="direction" type="Number">要锁定的方向&#10;0为不锁定&#10;1为横屏&#10;2为竖屏</param>
+        /// <returns type="Boolean">是否锁定成功</returns>
+
+        if (!screen.lockOrientation || !screen.unlockOrientation) return false;
+        switch (direction) {
+            case 1:
+                // 锁定为横屏
+                screen.lockOrientation(["landscape-primary", "landscape-secondary"]);
+                break;
+            case 2:
+                // 锁定为竖屏
+                screen.lockOrientation(["portrait-primary", "portrait-secondary"]);
+                break;
+            case 0:
+                // 解锁屏幕方向
+                screen.unlockOrientation();
+                break;
+        }
+        return true;
+    };
+
     s.capture = function (canvas, type) {
         /// <summary>截取游戏屏幕</summary>
         /// <param name="canvas" type="CanvasRenderer">Canvas渲染器</param>

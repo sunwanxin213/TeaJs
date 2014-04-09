@@ -43,7 +43,7 @@ void function (window) {
         navigator.getGamepads = function () {
             return (navigator.msGetGamepads && navigator.msGetGamepads()) ||
                    (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) ||
-                   (navigator.mozGetGamepads && navigator.mozGetGamepads())||
+                   (navigator.mozGetGamepads && navigator.mozGetGamepads()) ||
                    navigator.msGamepads ||
                    navigator.webkitGamepads ||
                    navigator.mozGamepads ||
@@ -72,6 +72,18 @@ void function (window) {
                                document.mozExitPointerLock ||
                                document.webkitExitPointerLock ||
                                document.msExitPointerLock;
+
+    // 锁定屏幕方向
+    screen.lockOrientation = screen.lockOrientation ||
+                             screen.mozLockOrientation ||
+                             screen.msLockOrientation ||
+                             screen.webkitLockOrientation;
+
+    // 取消锁定屏幕方向
+    screen.unlockOrientation = screen.unlockOrientation ||
+                               screen.mozUnlockOrientation ||
+                               screen.msUnLockOrientation ||
+                               screen.webkitUnLockOrientation;
 
     // 进入全屏
     var elList = [HTMLElement.prototype, SVGElement.prototype];
