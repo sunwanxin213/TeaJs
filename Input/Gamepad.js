@@ -21,10 +21,11 @@ void function (TeaJs) {
         // 添加手柄设备列表属性
         Object.defineProperty(obj, "list", {
             get: function () {
-                var controllers = navigator.getGamepads();
+                var controllers = navigator.getGamepads(),
+                    controller;
                 var list = [];
                 for (var j = 0; j < controllers.length; j++) {
-                    var controller = controllers[j];
+                    controller = controllers[j];
                     if (!controller) continue;
                     list[controller.index] = {
                         // 设备名称
@@ -33,14 +34,19 @@ void function (TeaJs) {
                         buttons: function () {
                             var btnList = [];
                             for (var i = 0; i < controller.buttons.length; i++) {
-                                var val = controller.buttons[i];
-                                var pressed = val == 1.0;
-                                if (typeof (val) == "object") {
-                                    pressed = val.pressed;
-                                    val = val.value;
+                                var value, pressed, percentage;
+                                value = controller.buttons[i];
+                                pressed = (value == 1.0);
+                                if (typeof (value) == "object") {
+                                    pressed = value.pressed;
+                                    value = value.value;
                                 }
-                                var pct = Math.round(val * 100);
-                                btnList.push(pressed);
+                                percentage = Math.round(value * 100);
+                                btnList.push({
+                                    pressed: pressed,
+                                    value: value,
+                                    percentage: percentage
+                                });
                             }
                             return btnList;
                         }(),
