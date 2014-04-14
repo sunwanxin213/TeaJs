@@ -25,6 +25,7 @@
         webgl: {
             isSupported: !!window.WebGLRenderingContext,
             isEnable: false,
+            level: 0,
             supportedContextNames: [],
             isIEWebGL: false,
             hasProblems: false,
@@ -106,9 +107,6 @@
                     tci.network = "3g";
                     tci.usePhoneData = true;
                     break;
-                default:
-                    tci.network = "unkown";
-                    break;
             }
         }
     }();
@@ -138,7 +136,8 @@
             else if (testUa("windows nt 6.3")) {
                 tci.system = "windows 8.1";
                 tci.browser == "msie" && (tci.browserVersion = tci.browserVersion < 11 ? 11 : tci.browserVersion);
-            } else if (testUa("windows phone")) {
+            }
+            else if (testUa("windows phone")) {
                 tci.system = "windows phone" + ua.split("windows phone")[1].split(";")[0].split(")")[0];
             }
         }
@@ -147,23 +146,6 @@
         else if (testUa("mac")) { tci.system = "mac"; }
         else if (testUa("linux")) { tci.system = "linux"; }
         else if (testUa("x11")) { tci.system = "unix"; }
-    }();
-
-    void function checkApi() {
-        /// <summary>API支持程度检测</summary>
-
-        tci.isSupportedUserMedia = !!(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia);
-        tci.isSupportedMIDIAccess = !!(navigator.requestMIDIAccess || navigator.webkitRequestMIDIAccess || navigator.mozRequestMIDIAccess || navigator.oRequestMIDIAccess || navigator.msRequestMIDIAccess);
-        tci.isSupportedGamepads = !!(navigator.msGamepads || navigator.webkitGamepads || navigator.mozGamepads || navigator.gamepads || (navigator.msGetGamepads && navigator.msGetGamepads()) || (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) || (navigator.mozGetGamepads && navigator.mozGetGamepads()) || (navigator.getGamepads && navigator.getGamepads()));
-        tci.isSupportedDeviceMotionEvent = !!(window.mozDeviceMotionEvent || window.webkitDeviceMotionEvent || window.msDeviceMotionEvent || window.oDeviceMotionEvent || window.DeviceMotionEvent);
-        tci.isSupportedMouseLock = !!(document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock || document.msExitPointerLock || document.oExitPointerLock);
-        tci.isSupportedFullscreen = !!(document.exitFullscreen || document.webkitCancelFullScreen || document.mozCancelFullScreen || document.oCancelFullScreen || document.msExitFullscreen);
-        tci.isSupportedAudioContext = !!(window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext);
-        tci.isSupportedSpeechRecognition = !!(window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.oSpeechRecognition || window.msSpeechRecognition);
-        tci.isSupportedWebWorker = !!(window.Worker);
-        tci.isSupportedWebSocket = !!(window.WebSocket);
-        tci.isSupportedBattery = !!(navigator.battery || navigator.webkitBattery || navigator.mozBattery || navigator.msBattery);
-        tci.isSupportedIndexedDB = "webkitIndexedDB" in window || "mozIndexedDB" in window || "msIndexedDB" in window || "IndexedDB" in window;
     }();
 
     void function checkMedia() {
@@ -250,7 +232,7 @@
 
         if (tci.webgl.isSupported) {
             // WebGL已知上下文名称列表
-            var webglContextNameList = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl", "3d"];
+            var webglContextNameList = ["webgl2", "experimental-webgl2", "webgl", "experimental-webgl", "webkit-3d", "moz-webgl", "3d"];
 
             for (var i = webglContextNameList.length; i-- && !tci.webgl.isIEWebGL;) {
                 // 检测支持的上下文名称
@@ -258,6 +240,8 @@
                     var tempCtx = document.createElement("canvas").getContext(webglContextNameList[i]);
                     return (glCtx = glCtx || tempCtx);
                 }()) {
+                    if (glCtx instanceof WebGL2RenderingContext) tci.webgl.level = 2;
+                    else if (ctx instanceof WebGLRenderingContext) tci.webgl.level = 1;
                     tci.webgl.supportedContextNames.push(webglContextNameList[i]);
                     tci.webgl.isEnable = true;
                 }

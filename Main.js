@@ -74,12 +74,13 @@ void function (window) {
         if (r != null) return unescape(r[2]); return "";
     };
 
-    TeaJs.loadFile = function (url, syne, type, callback) {
+    TeaJs.loadFile = function (url, syne, type, callback, onerror) {
         /// <summary>Ajax加载文件</summary>
         /// <param name="url" type="String">文件地址</param>
         /// <param name="syne" type="Boolean">是否异步加载</param>
         /// <param name="type" type="String">Mime类型</param>
         /// <param name="callback" type="Function">回调函数</param>
+        /// <param name="onerror" type="Function">自定义错误处理函数</param>
 
         var xmlHttp = new XMLHttpRequest();
         if (syne == null) {
@@ -107,7 +108,7 @@ void function (window) {
         if (type.indexOf("text") < 0) {
             xmlHttp.responseType = type;
         }
-        xmlHttp.onerror = function () {
+        xmlHttp.onerror = onerror || function () {
             throw new Error("File \"" + url + "\" failed to load.");
         };
         xmlHttp.onreadystatechange = function () {
