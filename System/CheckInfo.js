@@ -238,10 +238,11 @@
                 // 检测支持的上下文名称
                 if (function () {
                     var tempCtx = document.createElement("canvas").getContext(webglContextNameList[i]);
-                    return (glCtx = glCtx || tempCtx);
+                    glCtx = glCtx || tempCtx;
+                    return tempCtx;
                 }()) {
-                    if (glCtx instanceof WebGL2RenderingContext) tci.webgl.level = 2;
-                    else if (ctx instanceof WebGLRenderingContext) tci.webgl.level = 1;
+                    if ("WebGL2RenderingContext" in window && glCtx instanceof WebGL2RenderingContext) tci.webgl.level = 2;
+                    else if ("WebGLRenderingContext" in window && glCtx instanceof WebGLRenderingContext) tci.webgl.level = 1;
                     tci.webgl.supportedContextNames.push(webglContextNameList[i]);
                     tci.webgl.isEnable = true;
                 }
