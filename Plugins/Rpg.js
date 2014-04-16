@@ -115,6 +115,11 @@ void function (TeaJs) {
             if (x2 - x1 > 0) return 3;
         }
 
+        // 若要移动的点本身就是不可通行区域则不执行
+        if (this.frame.map.checkBlock(x, y)) {
+            return;
+        }
+
         this.path = this.getMovePath(x, y);
         if (!this.path || !this.path.length) return (fun && fun(this));
         var tempPath = [];

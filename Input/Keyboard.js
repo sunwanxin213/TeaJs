@@ -13,6 +13,11 @@ void function (TeaJs) {
         // 按键列表
         this.keyList = [];
 
+        // 设置keys属性
+        Object.defineProperty(this, "keys", {
+            get: function () { return keys; }
+        });
+
         // 绑定键盘按下事件
         document.addEventListener("keydown", function (e) {
             var curKey = 0,
@@ -99,7 +104,7 @@ void function (TeaJs) {
     };
 
     // 按键索引表
-    keyboard.keys = {
+    var keys = {
         none: 0,
         back: 8,
         tab: 9,
@@ -261,9 +266,6 @@ void function (TeaJs) {
         pa1: 253,
         oemclear: 254
     };
-
-    // 锁定Keys枚举
-    Object.freeze(keyboard.keys);
 
     TeaJs.Keyboard = Keyboard;
 }(TeaJs);
