@@ -6,12 +6,18 @@ void function (TeaJs) {
     // QQ音乐对象
     var QQMusic = {};
 
-    setInterval(function getJurisdiction() {
-        /// <summary>申请QQ音乐服务器访问权限</summary>
+    var isEnable = false;
 
-        injectScript("http://qzone-music.qq.com/fcg-bin/fcg_set_musiccookie.fcg?fromtag=31");
-        return getJurisdiction;
-    }(), 3 * 60 * 1000);
+    function enable() {
+        if (isEnable) return;
+        isEnable = true;
+        setInterval(function getJurisdiction() {
+            /// <summary>申请QQ音乐服务器访问权限</summary>
+
+            injectScript("http://qzone-music.qq.com/fcg-bin/fcg_set_musiccookie.fcg?fromtag=31");
+            return getJurisdiction;
+        }(), 3 * 60 * 1000);
+    }
 
     function injectScript(url) {
         /// <summary>引用脚本</summary>
@@ -65,6 +71,8 @@ void function (TeaJs) {
         /// <summary>获取猜你喜欢列表</summary>
         /// <param name="callback" type="Function">回调函数</param>
 
+        enable();
+
         var lableId = [];
         for (var i = 118; i < 142; i++) {
             lableId.push(i);
@@ -82,6 +90,8 @@ void function (TeaJs) {
         /// <summary>搜索歌曲</summary>
         /// <param name="key" type="String">关键字</param>
         /// <param name="callback" type="Function">回调函数</param>
+
+        enable();
 
         cb = callback;
 
