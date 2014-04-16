@@ -15,6 +15,15 @@ void function (TeaJs) {
         log2E: 1.44
     };
 
+    MathHelper.prefixInteger = function (number, length) {
+        /// <summary>用0补全位数</summary>
+        /// <param name="number" type="Number">要补全的数字</param>
+        /// <param name="length" type="Number">要补全的位数</param>
+        /// <returns type="Number">补全后的数字</returns>
+
+        return (number / Math.pow(10, length)).toFixed(length).substr(2);
+    };
+
     MathHelper.toRadian = function (degress) {
         /// <summary>角度转弧度</summary>
         /// <param name="degress" type="Number">角度值</param>
