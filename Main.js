@@ -17,7 +17,7 @@ void function (window) {
         // 输入设备文件列表
         ["Input", "Mouse", "Touch", "Keyboard", "Media", "Gamepad"],
         // 加载器文件列表
-        ["Loader", "Texture", "TextureDds", "Video", "Audio", "Shader", "ObjModel", "FrameAnimation", "TileMap"],
+        ["Loader", "Texture", "TextureDds", "Video", "Audio", "Shader", "ObjModel", "FrameAnimation", "TileMap", "Bms"],
         // 语音操作文件列表
         ["Voice", "Speech", "TTS"],
         // 管理器文件列表

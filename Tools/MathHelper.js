@@ -15,6 +15,17 @@ void function (TeaJs) {
         log2E: 1.44
     };
 
+    MathHelper.gcd = function (a, b) {
+        /// <summary>采用欧氏方法找到最大公约数</summary>
+        /// <param name="a" type="Number">数字1</param>
+        /// <param name="b" type="Number">数字2</param>
+        /// <returns type="Number">最大公约数</returns>
+
+        if (b > a) return gcd(b, a)
+        if (b === 0) return a
+        return MathHelper.gcd(b, a % b)
+    };
+
     MathHelper.prefixInteger = function (number, length) {
         /// <summary>用0补全位数</summary>
         /// <param name="number" type="Number">要补全的数字</param>
