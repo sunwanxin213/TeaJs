@@ -26,6 +26,19 @@ void function (TeaJs) {
         return MathHelper.gcd(b, a % b)
     };
 
+    MathHelper.lcm = function (a, b) {
+        /// <summary>最小公倍数</summary>
+        /// <param name="a" type="Number">数字1</param>
+        /// <param name="b" type="Number">数字2</param>
+        /// <returns type="Number">最小公倍数</returns>
+
+        a = Math.max(a, [b, b = Math.min(a, b)][0]);
+        return function (p) {
+            while (b != 0) a = [b, b = Math.max(a, b) % b][0];
+            return p / a;
+        }(a * b);
+    };
+
     MathHelper.prefixInteger = function (number, length) {
         /// <summary>用0补全位数</summary>
         /// <param name="number" type="Number">要补全的数字</param>
