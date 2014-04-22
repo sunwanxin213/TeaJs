@@ -30,6 +30,8 @@ void function (TeaJs) {
         TeaJs.loadFile(fileName, true, null, function (str) {
             var bmsObj = BMS.parse(str.replace(/(\r|\r\n|\n)+/g, "\n"));
 
+            bmsObj.measureCount = BMS.stat(bmsObj).maxMeasure;
+
             // 加入到项列表中
             _this.itemList.push({
                 name: name,
