@@ -44,13 +44,6 @@ void function (TeaJs) {
     // 缓存2D向量原型对象
     var vector2 = Vector2.prototype;
 
-    vector2.toString = function () {
-        /// <summary>转换为字符串</summary>
-        /// <returns type="String">格式化后的字符串</returns>
-
-        return "{X:" + this.x + " Y:" + this.y + "}";
-    };
-
     vector2.clone = function () {
         /// <summary>克隆对象</summary>
         /// <returns type="Vector2">2D向量对象</returns>
@@ -60,7 +53,8 @@ void function (TeaJs) {
 
     vector2.offset = function (x, y) {
         /// <summary>向量相加</summary>
-        /// <param name="vector2" type="Vector2">2D向量对象</param>
+        /// <param name="x" type="Number">X偏移</param>
+        /// <param name="y" type="Number">Y偏移</param>
         /// <returns type="Vector2">2D向量对象</returns>
 
         return new TeaJs.Vector2(this.x + x, this.y + y);

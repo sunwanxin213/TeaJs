@@ -47,13 +47,6 @@ void function (TeaJs) {
     // 缓存3D向量原型对象
     var vector3 = Vector3.prototype;
 
-    vector3.toString = function () {
-        /// <summary>转换为字符串</summary>
-        /// <returns type="String">格式化后的字符串</returns>
-
-        return "{X:" + this.x + " Y:" + this.y + " Z:" + this.z + "}";
-    };
-
     vector3.clone = function () {
         /// <summary>克隆对象</summary>
         /// <returns type="Vector3">3D向量对象</returns>
@@ -61,12 +54,14 @@ void function (TeaJs) {
         return new TeaJs.Vector3(this);
     };
 
-    vector3.offset = function (x, y, z) {
+    vector3.offset = function (x,y,z) {
         /// <summary>向量相加</summary>
-        /// <param name="vector3" type="Vector3">3D向量对象</param>
+        /// <param name="x" type="Number">X偏移</param>
+        /// <param name="y" type="Number">Y偏移</param>
+        /// <param name="z" type="Number">Z偏移</param>
         /// <returns type="Vector3">3D向量对象</returns>
 
-        return new TeaJs.Vector3(this.x + vector3.x, this.y + vector3.y, this.z + vector3.z);
+        return new TeaJs.Vector3(this.x + x, this.y + y, this.z + z);
     };
 
     TeaJs.Vector3 = Vector3;
