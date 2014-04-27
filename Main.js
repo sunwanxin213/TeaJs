@@ -9,7 +9,7 @@ void function (window) {
         // 系统支持文件列表
         ["System", "ApiCompatible", "CheckInfo", "Function"],
         // 构造器文件列表
-        ["Constructor", "Renderer", "Loader", "C2Effect", "AudioContext", "Point3", "Triangle", "Vector2", "Vector3", "Rectangle"],
+        ["Constructor", "Renderer", "Loader", "C2Effect", "AudioContext", "Vector2", "Vector3", "Rectangle"],
         // 工具文件列表
         ["Tools", "MathHelper", "Color", "Bounds", "Lzw"],
         // 渲染器文件列表

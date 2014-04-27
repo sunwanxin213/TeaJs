@@ -119,8 +119,9 @@ void function (TeaJs) {
 
         // 元素位置
         var obj = this.object,
-            styleWidth = (obj.style.width.replace(/\px/g, "")) | 0,
-            styleHeight = (obj.style.height.replace(/\px/g, "")) | 0;
+            style = document.defaultView.getComputedStyle(obj),
+            styleWidth = (style.width.replace(/\px/g, "")) | 0,
+            styleHeight = (style.height.replace(/\px/g, "")) | 0;
 
         if (e.pageX || e.pageY) {
             this.x = e.pageX;

@@ -457,7 +457,7 @@ void function (TeaJs) {
                         fun = function () {
                             p.direction = hero.direction + 2;
                             if (p.direction > 3) p.direction -= 4;
-                            p.fun(p);
+                            p.fun && p.fun(p);
                         };
                         break;
                     }
