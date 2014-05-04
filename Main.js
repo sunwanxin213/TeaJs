@@ -17,13 +17,15 @@ void function (window) {
         // 输入设备文件列表
         ["Input", "Mouse", "Touch", "Keyboard", "Media", "Gamepad"],
         // 加载器文件列表
-        ["Loader", "Texture", "TextureDds", "Video", "Audio", "Shader", "ObjModel", "FrameAnimation", "TileMap", "Bms"],
+        ["Loader", "Texture", "TextureDds", "Video", "Audio", "Shader", "ObjModel", "MdxModel", "FrameAnimation", "TileMap", "Bms"],
         // 语音操作文件列表
         ["Voice", "Speech", "TTS"],
         // 管理器文件列表
         ["Manager", "Content", "Screen", "Game"],
         // 游戏框架列表
-        ["Plugins", "C2Effect", "QQMusic", "Map45Degrees", "Rpg"]
+        ["Plugins", "C2Effect", "QQMusic", "Map45Degrees", "Rpg"],
+        // 引用框架
+        ["References", "glMatrix-0.9.5.min"]
     ];
 
     function TeaJs(path, isDebug, callback) {
