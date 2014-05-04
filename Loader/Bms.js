@@ -31,6 +31,8 @@ void function (TeaJs) {
             var bmsObj = BMS.parse(str.replace(/(\r|\r\n|\n)+/g, "\n"));
 
             bmsObj.measureCount = BMS.stat(bmsObj).maxMeasure;
+            bmsObj.headers.bpm = parseInt(bmsObj.headers.bpm);
+            bmsObj.measureTime = 240 / bmsObj.headers.bpm;
 
             // 加入到项列表中
             _this.itemList.push({
