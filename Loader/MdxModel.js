@@ -1,5 +1,7 @@
 ﻿/*
     Mdx格式模型加载器
+
+    感谢"小兵葛革"提供MDX模型导入代码
 */
 void function (TeaJs) {
     "use strict";
@@ -48,7 +50,7 @@ void function (TeaJs) {
         });
     };
 
-    var analyzer = (function () {
+    var analyzer = function () {
         var MDX = {};
 
         var modelBaseUrl = "";
@@ -56,7 +58,7 @@ void function (TeaJs) {
         var gl = null;
 
         // 序列动画结构大小
-        var SequenceAnimStructSize = 80 + 4 * 7 + 4 * 3 + 4 * 3;
+        var sequenceAnimStructSize = 80 + 4 * 7 + 4 * 3 + 4 * 3;
 
         var LineType = {
             NOT_INTERP: 0,
@@ -178,7 +180,7 @@ void function (TeaJs) {
             update: false
         };
 
-        model.GetAnimAlpha = function (geoID, animInfo) {
+        model.getAnimAlpha = function (geoID, animInfo) {
             if (geoID > this.numGeosetAnim - 1 || geoID < 0) return 1.0;
 
             var alpha = this.geosetAlpha[geoID].data;
@@ -209,38 +211,38 @@ void function (TeaJs) {
             return 1.0;
         };
 
-        model.Skeleton_CalcTransformMatrixInternal = function (animInfo, parentMatrix, parentID) {
+        model.skeletoncalcTransformMatrixInternal = function (animInfo, parentMatrix, parentID) {
             for (var i = 0 ; i < this.numBone ; i++) {
                 if (this.bones[i].parentID == parentID) {
                     //骨块原点为骨块指向的关节点
                     var center = vec3.create(this.pivotPoints[this.bones[i].objectID]);
 
                     //计算骨块变换矩阵
-                    this.bones[i].CalcTransformMatrix(center, animInfo, parentMatrix);
+                    this.bones[i].calcTransformMatrix(center, animInfo, parentMatrix);
 
                     //获取骨块透明度
-                    var alpha = this.GetAnimAlpha(this.bones[i].geosetAnimID, animInfo);
+                    var alpha = this.getAnimAlpha(this.bones[i].geosetAnimID, animInfo);
                     this.bones[i].geosetAnimAlpha = alpha;
 
                     //继续计算骨块的子节点
-                    this.Skeleton_CalcTransformMatrixInternal(animInfo, this.bones[i].transformMatrix, this.bones[i].objectID);
+                    this.skeletoncalcTransformMatrixInternal(animInfo, this.bones[i].transformMatrix, this.bones[i].objectID);
                 }
             }
         }
 
-        model.Skeleton_CalcTransformMatrix = function (animInfo) {
+        model.skeletoncalcTransformMatrix = function (animInfo) {
             var mat = mat4.create();
 
             //变换矩阵从 1 开始
             mat4.identity(mat);
 
             //遍历计算所有骨块
-            this.Skeleton_CalcTransformMatrixInternal(animInfo, mat, -1);
+            this.skeletoncalcTransformMatrixInternal(animInfo, mat, -1);
 
             debug_switch = false;
         };
 
-        Model.prototype.GetTransformMatrix = function (matrix, animAlpha, groupMatrix, index, count) {
+        model.getTransformMatrix = function (matrix, animAlpha, groupMatrix, index, count) {
             mat4.set(this.bones[groupMatrix[index]].transformMatrix, matrix);
             animAlpha = this.bones[groupMatrix[index]].geosetAnimAlpha;
 
@@ -260,13 +262,13 @@ void function (TeaJs) {
         };
 
         var binited = false;
-        Model.prototype.Render = function () {
+        model.Render = function () {
             //当前动画帧信息
             //TODO 
             if (binited == false) {
                 binited = true;
 
-                this.currentAnimInfo.currentAnim = 0;
+                this.currentAnimInfo.currentAnim = 5;
                 var anim = this.sequences[this.currentAnimInfo.currentAnim];
                 this.currentAnimInfo.currentFrame = anim.startFrame;
                 this.currentAnimInfo.startFrame = anim.startFrame;
@@ -281,10 +283,10 @@ void function (TeaJs) {
             }
 
             //根据当前动画帧计算当前骨架的变换矩阵集
-            this.Skeleton_CalcTransformMatrix(this.currentAnimInfo);
+            this.skeletoncalcTransformMatrix(this.currentAnimInfo);
 
             var render_mask = [0, 1, 1, 0, 0];
-            for (var model_index = 0 ; model_index < this.numChunks ; ++model_index) {
+            for (var model_index = 0 ; model_index < this.numChunks ; model_index++) {
                 //渲染模型部件
                 //if( render_mask[model_index] == 1 )
                 this.chunks[model_index].Render(this);
@@ -301,7 +303,7 @@ void function (TeaJs) {
 
         var bone = Bone.prototype;
 
-        bone.GetRotationMatrix = function (animInfo) {
+        bone.getRotationMatrix = function (animInfo) {
             var frameCount = this.keyFrameCount[MotionType.KGRT];
             var type = this.lineType[MotionType.KGRT];
             var vec = null;
@@ -354,7 +356,7 @@ void function (TeaJs) {
             return null;
         };
 
-        bone.GetTransferMatrix = function (animInfo) {
+        bone.getTransferMatrix = function (animInfo) {
             var frameCount = this.keyFrameCount[MotionType.KGTR];
             var type = this.lineType[MotionType.KGTR];
             var vec = null;
@@ -405,7 +407,7 @@ void function (TeaJs) {
             return null;
         };
 
-        bone.CalcTransformMatrix = function (center, animInfo, parentMatrix) {
+        bone.calcTransformMatrix = function (center, animInfo, parentMatrix) {
             //计算变化矩阵
             var scaling = null;		//缩放
             var rotation = null;		//旋转
@@ -456,11 +458,11 @@ void function (TeaJs) {
             }
 
             if (this.keyFrameCount[MotionType.KGTR] > 0) {
-                translation = this.GetTransferMatrix(animInfo);
+                translation = this.getTransferMatrix(animInfo);
             }
 
             if (this.keyFrameCount[MotionType.KGRT] > 0) {
-                rotation = this.GetRotationMatrix(animInfo);
+                rotation = this.getRotationMatrix(animInfo);
             }
 
             if (this.keyFrameCount[MotionType.KGSC] > 0) {
@@ -487,7 +489,7 @@ void function (TeaJs) {
 
         var geoChunk = GeoChunk.prototype;
 
-        geoChunk.CalcGroupMatrix = function (mdx_model) {
+        geoChunk.calcGroupMatrix = function (mdx_model) {
             if (this.matrixes == undefined) {
                 this.matrixes = [];
                 for (var i = 0 ; i < this.numGroups ; ++i) {
@@ -501,7 +503,7 @@ void function (TeaJs) {
             for (var i = 0 ; i < this.numGroups ; i++) {
                 var matrixCount = this.groups[i];
 
-                mdx_model.GetTransformMatrix(this.matrixes[i], this.AnimAlphas[i], this.matrixGroups, index, matrixCount);
+                mdx_model.getTransformMatrix(this.matrixes[i], this.AnimAlphas[i], this.matrixGroups, index, matrixCount);
 
                 index += matrixCount;
             }
@@ -510,7 +512,7 @@ void function (TeaJs) {
         geoChunk.Render = function (mdx_model) {
             var mat = mdx_model.materials[this.materialID < 0 ? 0 : this.materialID];
 
-            this.CalcGroupMatrix(mdx_model);
+            this.calcGroupMatrix(mdx_model);
 
             for (var L = 0 ; L < mat.numLayers ; ++L) {
                 var alpha = 1.0;//mat->getFrameAlpha( animInfo.currentFrame , l );
@@ -1241,9 +1243,10 @@ void function (TeaJs) {
             return material;
         }
 
-        function mdx_load_model_from_buff(databuff, modelUrl, webgl) {
-            modelBaseUrl = modelUrl;
+        function loadModelFromBuff(databuff, modelUrl, webgl) {
             gl = webgl;
+
+            modelBaseUrl = modelUrl;
 
             var mdxModel = new Model();
 
@@ -1289,14 +1292,14 @@ void function (TeaJs) {
                 var chunkSize = dataview.getUint32(p, true);
                 p += 4;
 
-                var funList = ["HELP", "mdx_read_skeleton_helpers",
-                               "BONE", "mdx_read_skeleton_bones",
-                               "GEOA", "mdx_read_skeleton_geosets_anims",
-                               "GEOS", "mdx_read_geosets",
-                               "SEQS", "mdx_read_sequences",
-                               "TEXS", "mdx_read_textures",
-                               "MTLS", "mdx_read_materialmap",
-                               "PIVT", "mdx_read_skeleton_pivotpoints"];
+                var funList = ["HELP", "readSkeletonHelpers",
+                               "BONE", "readSkeletonBones",
+                               "GEOA", "readSkeletonGeosetsAnims",
+                               "GEOS", "readGeosets",
+                               "SEQS", "readSequences",
+                               "TEXS", "readTextures",
+                               "MTLS", "readMaterialmap",
+                               "PIVT", "readSkeletonPivotpoints"];
 
                 switch (chunkTag) {
                     case 'ATCH':
@@ -1328,7 +1331,7 @@ void function (TeaJs) {
             return mdxModel;
         }
 
-        MDX.mdx_read_geosets = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readGeosets = function (mdxModel, dataview, inPos, inSize) {
             mdxModel.numChunks = 0;
             mdxModel.chunks = [];
 
@@ -1343,7 +1346,7 @@ void function (TeaJs) {
             }
         };
 
-        MDX.mdx_read_skeleton_geosets_anims = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readSkeletonGeosetsAnims = function (mdxModel, dataview, inPos, inSize) {
             var p = inPos;
 
             mdxModel.numGeosetAnim = 0;
@@ -1408,7 +1411,7 @@ void function (TeaJs) {
             }
         };
 
-        MDX.mdx_read_sequences = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readSequences = function (mdxModel, dataview, inPos, inSize) {
             /// <summary>读取序列动画数据</summary>
             /// <param name="mdxModel" type="Object">模型对象</param>
             /// <param name="dataview" type="Object"></param>
@@ -1418,7 +1421,7 @@ void function (TeaJs) {
             var p = inPos;
 
             // 序列动画数量
-            mdxModel.numSequences = inSize / SequenceAnimStructSize;
+            mdxModel.numSequences = inSize / sequenceAnimStructSize;
 
             // 定义序列动画数组
             mdxModel.sequences = [];
@@ -1458,7 +1461,7 @@ void function (TeaJs) {
             }
         };
 
-        MDX.mdx_read_skeleton_helpers = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readSkeletonHelpers = function (mdxModel, dataview, inPos, inSize) {
             var p = inPos;
 
             if (mdxModel.numBone == undefined) {
@@ -1480,7 +1483,7 @@ void function (TeaJs) {
 
         };
 
-        MDX.mdx_read_skeleton_bones = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readSkeletonBones = function (mdxModel, dataview, inPos, inSize) {
             var p = inPos;
 
             if (mdxModel.numBone == undefined) {
@@ -1501,7 +1504,7 @@ void function (TeaJs) {
             }
         };
 
-        MDX.mdx_read_materialmap = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readMaterialmap = function (mdxModel, dataview, inPos, inSize) {
             var p = inPos;
 
             mdxModel.numMaterials = 0;
@@ -1519,7 +1522,7 @@ void function (TeaJs) {
             }
         };
 
-        MDX.mdx_read_skeleton_pivotpoints = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readSkeletonPivotpoints = function (mdxModel, dataview, inPos, inSize) {
             var p = inPos;
 
             mdxModel.numPivotPoint = inSize / (3 * 4);
@@ -1531,7 +1534,7 @@ void function (TeaJs) {
             }
         };
 
-        MDX.mdx_read_textures = function (mdxModel, dataview, inPos, inSize) {
+        MDX.readTextures = function (mdxModel, dataview, inPos, inSize) {
             var p = inPos;
 
             // 读取数据块
@@ -1575,8 +1578,8 @@ void function (TeaJs) {
             }
         };
 
-        return mdx_load_model_from_buff;
-    }());
+        return loadModelFromBuff;
+    }();
 
     TeaJs.Loader.MdxModel = MdxModel;
 }(TeaJs);
