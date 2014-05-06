@@ -211,6 +211,8 @@ void function (TeaJs) {
                 return model;
             }(obj);
 
+            obj.format = "OBJ";
+
             // 加入到项列表中
             _this.itemList.push({
                 name: name,

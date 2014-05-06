@@ -52,6 +52,7 @@ void function (TeaJs) {
         for (var i in TeaJs.Loader) {
             var loader = new TeaJs.Loader[i]();
             if (loaderNames.join().indexOf(loader.loaderName) < 0) {
+                loader._manager = this;
                 this.loaderList.push(loader);
                 loaderNames.push(loader.loaderName);
             }
@@ -129,7 +130,7 @@ void function (TeaJs) {
                     if (TeaJs.isDebug) {
                         console.log("%s%s \"%s\" Loaded.", renderer ? "WebGL_" : "", list[i].loaderName, fileName);
                     }
-                }, renderer && renderer.context);
+                }, renderer && (renderer.context || renderer));
                 checkLoading(_this);
                 return;
             }

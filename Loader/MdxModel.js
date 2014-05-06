@@ -36,7 +36,7 @@ void function (TeaJs) {
             // 解析模型
             var model = analyzer(obj, fileName.substr(0, fileName.lastIndexOf("/") + 1), gl);
 
-            model.format = "mdx";
+            model.format = "MDX";
 
             // 加入到项列表中
             _this.itemList.push({
@@ -53,9 +53,9 @@ void function (TeaJs) {
     var analyzer = function () {
         var MDX = {};
 
-        var modelBaseUrl = "";
-
         var gl = null;
+
+        var modelBaseUrl = "";
 
         // 序列动画结构大小
         var sequenceAnimStructSize = 80 + 4 * 7 + 4 * 3 + 4 * 3;
@@ -104,7 +104,7 @@ void function (TeaJs) {
             this.blue = 0.0;
             this.green = 0.0;
             this.red = 0.0;
-            this.GeosetID = 0;
+            this.geosetID = 0;
         }
 
         function KGAO() {
@@ -161,27 +161,45 @@ void function (TeaJs) {
         function Model() {
             /// <summary>MDX模型</summary>
 
-            this.loadingObject = [];
+            var _this = this;
+
+            this.resources = {};
+
+            // 当前帧索引
+            var currentFrame = 0;
+            Object.defineProperty(this.animInfo, "currentFrame", {
+                get: function () { return currentFrame; },
+                set: function (value) {
+                    currentFrame = value;
+                    var cai = _this.animInfo;
+                    if (currentFrame >= cai.endFrame || currentFrame < cai.startFrame) {
+                        currentFrame = cai.startFrame;
+                    }
+                    //根据当前动画帧计算当前骨架的变换矩阵集
+                    _this.skeletoncalcTransformMatrix(cai);
+                }
+            });
         }
 
         var model = Model.prototype;
 
         // 当前动画信息
-        model.currentAnimInfo = {
+        model.animInfo = {
             // 当前动画索引
-            currentAnim: 0,
+            currentAnim: -1,
             // 开始帧索引
             startFrame: 0,
             // 结束帧索引
-            endFrame: 0,
-            // 当前帧索引
-            currentFrame: 0,
-            // 是否更新
-            update: false
+            endFrame: 0
         };
 
         model.getAnimAlpha = function (geoID, animInfo) {
-            if (geoID > this.numGeosetAnim - 1 || geoID < 0) return 1.0;
+            /// <summary>获取动画Alpha值</summary>
+            /// <param name="geoID" type="Number">几何编号</param>
+            /// <param name="animInfo" type="Object">动画信息</param>
+            /// <returns type="Number"></returns>
+
+            if (geoID > this.geosetAnim.length - 1 || geoID < 0) return 1.0;
 
             var alpha = this.geosetAlpha[geoID].data;
 
@@ -212,7 +230,7 @@ void function (TeaJs) {
         };
 
         model.skeletoncalcTransformMatrixInternal = function (animInfo, parentMatrix, parentID) {
-            for (var i = 0 ; i < this.numBone ; i++) {
+            for (var i = 0 ; i < this.bones.length ; i++) {
                 if (this.bones[i].parentID == parentID) {
                     //骨块原点为骨块指向的关节点
                     var center = vec3.create(this.pivotPoints[this.bones[i].objectID]);
@@ -247,12 +265,12 @@ void function (TeaJs) {
             animAlpha = this.bones[groupMatrix[index]].geosetAnimAlpha;
 
             if (count > 1) {
-                for (var k = 1 ; k < count ; ++k) {
+                for (var k = 1 ; k < count ; k++) {
                     mat4.set(mat4.add(matrix, this.bones[groupMatrix[index + k]].transformMatrix), matrix);
                     animAlpha += this.bones[groupMatrix[index + k]].geosetAnimAlpha;
                 }
 
-                for (var mat_i = 0 ; mat_i < matrix.length ; ++mat_i) {
+                for (var mat_i = 0 ; mat_i < matrix.length ; mat_i++) {
                     matrix[mat_i] *= 1.0 / count;
                 }
                 animAlpha *= 1.0 / count;
@@ -261,36 +279,22 @@ void function (TeaJs) {
             return animAlpha;
         };
 
-        var binited = false;
-        model.Render = function () {
-            //当前动画帧信息
-            //TODO 
-            if (binited == false) {
-                binited = true;
+        model.setCurrentAnim = function (name) {
+            /// <summary>设置当前动画</summary>
+            /// <param name="name" type="String">动画名称</param>
 
-                this.currentAnimInfo.currentAnim = 5;
-                var anim = this.sequences[this.currentAnimInfo.currentAnim];
-                this.currentAnimInfo.currentFrame = anim.startFrame;
-                this.currentAnimInfo.startFrame = anim.startFrame;
-                this.currentAnimInfo.endFrame = anim.endFrame;
-            }
-            else {
-                this.currentAnimInfo.currentFrame += 10;
-
-                if (this.currentAnimInfo.currentFrame >= this.currentAnimInfo.endFrame) {
-                    this.currentAnimInfo.currentFrame = this.currentAnimInfo.startFrame;
+            var currAnim = this.animInfo;
+            currAnim.currentAnim = -1;
+            for (var i = this.sequences.length; i--;) {
+                if (this.sequences[i].name == name) {
+                    currAnim.currentAnim = i;
+                    break;
                 }
             }
-
-            //根据当前动画帧计算当前骨架的变换矩阵集
-            this.skeletoncalcTransformMatrix(this.currentAnimInfo);
-
-            var render_mask = [0, 1, 1, 0, 0];
-            for (var model_index = 0 ; model_index < this.numChunks ; model_index++) {
-                //渲染模型部件
-                //if( render_mask[model_index] == 1 )
-                this.chunks[model_index].Render(this);
-            }
+            var anim = this.sequences[currAnim.currentAnim];
+            currAnim.currentFrame = anim.startFrame;
+            currAnim.startFrame = anim.startFrame;
+            currAnim.endFrame = anim.endFrame;
         };
 
         function Bone() {
@@ -483,16 +487,19 @@ void function (TeaJs) {
             return this.transformMatrix;
         };
 
-        function GeoChunk() {
+        function Mesh() {
             this.materialID = -1;
         }
 
-        var geoChunk = GeoChunk.prototype;
+        var mesh = Mesh.prototype;
 
-        geoChunk.calcGroupMatrix = function (mdx_model) {
+        mesh.calcGroupMatrix = function (mdx_model) {
+            /// <summary>计算矩阵组</summary>
+            /// <param name="mdx_model" type="Model">模型对象</param>
+
             if (this.matrixes == undefined) {
                 this.matrixes = [];
-                for (var i = 0 ; i < this.numGroups ; ++i) {
+                for (var i = 0 ; i < this.numGroups ; i++) {
                     this.matrixes[i] = mat4.create();
                 }
 
@@ -509,12 +516,14 @@ void function (TeaJs) {
             }
         };
 
-        geoChunk.Render = function (mdx_model) {
+        mesh.draw = function () {
+            var mdx_model = this._model;
+
             var mat = mdx_model.materials[this.materialID < 0 ? 0 : this.materialID];
 
             this.calcGroupMatrix(mdx_model);
 
-            for (var L = 0 ; L < mat.numLayers ; ++L) {
+            for (var L = 0 ; L < mat.numLayers ; L++) {
                 var alpha = 1.0;//mat->getFrameAlpha( animInfo.currentFrame , l );
                 var useLight = true;
                 var useModelColor = false;
@@ -522,22 +531,7 @@ void function (TeaJs) {
                 //texture
                 var bindTex = mdx_model.bitmaps[mat.layers[L].textureID].texture;
 
-                var modelColor = vec3.create([1.0, 0.0, 0.0]);
-
-                //if (bindTex == 0) {
-                //    if (mat.layers[L].filterMode != 3) {
-                //        //设置模型颜色
-                //        //D3DXCOLOR *color = model->GetModelColor( );
-                //        //glColor4f( color->r , color->g , color->b , 1.0f );
-                //    }
-
-                //    //			gl.bindTexture( gl.TEXTURE_2D , null );
-                //}
-                //else {
-                //    //			gl.activeTexture( gl.TEXTURE0 );
-                //    //			gl.bindTexture( gl.TEXTURE_2D , bindTex );
-                //    //			gl.uniform1i( shaderProgram.samplerUniform , 0 );
-                //}
+                var modelColor = vec3.create([0.0, 0.0, 1.0]);
 
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, bindTex);
@@ -582,19 +576,6 @@ void function (TeaJs) {
                     gl.blendFunc(gl.ONE, gl.ONE);
 
                     gl.depthMask(false);
-
-                    //if (mdx_model.bitmaps[mat.layers[L].textureID].replaceableID != 2) // ! team glow
-                    //{
-                    //    //glEnable(GL_COLOR_MATERIAL);
-                    //    //glColor4f(0.4f,0.4f,0.4f,alpha/2.0f);
-                    //    //gl.enable(GL_LIGHTING);
-                    //    //useLight = true;
-                    //}
-                    //else {
-                    //    //glColor4f( 1.0f , 1.0f , 1.0f , 1.0f );
-                    //}
-                    //continue;
-
                 }
                 else {
                     gl.disable(gl.BLEND);
@@ -606,32 +587,18 @@ void function (TeaJs) {
 
                 //draw primitives
                 var rVertices = new Float32Array(this.numVertices * 3);
-                for (var i = 0 ; i < this.numVertices * 3 ; ++i)
+                for (var i = 0 ; i < this.numVertices * 3 ; i++)
                     rVertices[i] = this.vertices[i];;
 
                 var rNormals = new Float32Array(this.numVertices * 3);
-                for (var i = 0 ; i < this.numVertices * 3 ; ++i)
+                for (var i = 0 ; i < this.numVertices * 3 ; i++)
                     rNormals[i] = this.normals[i];
-
-
-                //for (var i = 0 ; i < this.numGroups ; ++i) {
-                //    var mat = this.matrixes[i];
-
-                //    for (var j = 0 ; j < this.numTriangles * 3 ; ++j) {
-                //        var v = this.triangles[j];
-
-                //        if (this.vertexGroups[v] == i) {
-                //            vec3_transformCood2(rVertices, 3 * v, mat);
-                //            vec3_transformNormal2(rNormals, 3 * v, mat);
-                //        }
-                //    }
-                //}
 
                 var realVertices = new Float32Array(this.numTriangles * 3 * 3);
                 var realNormals = new Float32Array(this.numTriangles * 3 * 3);
                 var realUVs = new Float32Array(this.numTriangles * 3 * 2);
 
-                for (var i = 0 ; i < this.numTriangles ; ++i) {
+                for (var i = 0 ; i < this.numTriangles ; i++) {
                     var index, v;
 
                     v = this.triangles[3 * i];//三角形顶点之一的顶点索引
@@ -677,47 +644,6 @@ void function (TeaJs) {
                 realBuffer.numItems = this.numTriangles * 3; //共有多少个顶点
                 gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, realBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-                //for (var i = 0 ; i < this.numTriangles ; ++i) {
-                //    var index;
-                //    var v0 = this.triangles[3 * i];
-                //    var v1 = this.triangles[3 * i + 1];
-                //    var v2 = this.triangles[3 * i + 2];
-
-                //    index = this.vertexGroups[v0];
-                //    vec3_transformCoord(rVertices, 3 * v0, this.matrixes[index]);
-                //    vec3_transformNormal(rNormals, 3 * v0, this.matrixes[index]);
-
-                //    index = this.vertexGroups[v1];
-                //    vec3_transformCoord(rVertices, 3 * v1, this.matrixes[index]);
-                //    vec3_transformNormal(rNormals, 3 * v1, this.matrixes[index]);
-
-                //    index = this.vertexGroups[v2];
-                //    vec3_transformCoord(rVertices, 3 * v2, this.matrixes[index]);
-                //    vec3_transformNormal(rNormals, 3 * v2, this.matrixes[index]);
-                //}
-
-                //console.log( "\t\t chunk primitivecount = " + this.trianglesBuffer.numItems );
-
-                //gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-                //gl.bufferData(gl.ARRAY_BUFFER, rVertices, gl.STATIC_DRAW);
-                //gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.verticesBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-                //gl.bindBuffer(gl.ARRAY_BUFFER, this.normalsBuffer);
-                //gl.bufferData(gl.ARRAY_BUFFER, rNormals, gl.STATIC_DRAW);
-                //gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, this.normalsBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-                ////gl.bindBuffer( gl.ARRAY_BUFFER , triangleVertexColorBuffer );
-                ////gl.vertexAttribPointer( shaderProgram.vertexColorAttribute , triangleVertexColorBuffer.itemSize , gl.FLOAT , false , 0 , 0 );
-
-                //gl.bindBuffer(gl.ARRAY_BUFFER, this.uvsBuffer);
-                //gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, this.uvsBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-
-                //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
-
-
-                //useLight = true;
-                //useModelColor = true;
                 gl.uniform1i(shaderProgram.useModelColorUniform, useModelColor);
                 gl.uniform1i(shaderProgram.useLightingUniform, useLight);
 
@@ -770,12 +696,13 @@ void function (TeaJs) {
         }
 
         function loadOver(type, name, obj) {
-            if (this.loadingObject[name] != undefined) {
-                this.loadingObject[name] = undefined;
-            }
+            /// <summary>加载完成<summary>
+            /// <param name="type" type="String">文件类型</param>
+            /// <param name="name" type="String">文件名</param>
+            /// <param name="obj" type="Object">对象</param>
 
             if (type == "texture") {
-                this.loadingObject[name] = obj.image;
+                this.resources[name] = obj.image;
                 gl.bindTexture(gl.TEXTURE_2D, obj);
 
                 gl.pixelStorei(gl.UNPACK_ALIGNMENT, true);
@@ -869,24 +796,27 @@ void function (TeaJs) {
         }
 
         function mdx_read_geochunk(dataview, inPos, inSize) {
-            var geochunk = new GeoChunk();
+            /// <summary>读取几何数据区</summary>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
+            var geochunk = new Mesh();
             var n = 0;
             var p = inPos;
             while ((p < inPos + inSize) && (n < 8)) {
-                var tag = dataview.getString(p, 4);
-                p += 4;
+                var tag = dataview.getString([p, p += 4][0], 4);
 
                 switch (tag) {
-                    case 'VRTX': // vertex
+                    case 'VRTX':
+                        // 顶点数据
                         n++;
 
-                        geochunk.numVertices = dataview.getUint32(p, true);
-                        p += 4;
+                        geochunk.numVertices = dataview.getUint32([p, p += 4][0], true);
                         geochunk.vertices = new Float32Array(geochunk.numVertices * 3);//( D3DXVECTOR3* ) p.c;
 
                         for (var id = 0 ; id < geochunk.numVertices * 3 ; id++) {
-                            geochunk.vertices[id] = dataview.getFloat32(p, true);
-                            p += 4;
+                            geochunk.vertices[id] = dataview.getFloat32([p, p += 4][0], true);
                         }
 
                         geochunk.verticesBuffer = gl.createBuffer();
@@ -895,11 +825,11 @@ void function (TeaJs) {
                         geochunk.verticesBuffer.itemSize = 3;
                         geochunk.verticesBuffer.numItems = geochunk.numVertices;
                         break;
-                    case 'NRMS': // normal
+                    case 'NRMS':
+                        // 法线数据
                         n++;
 
-                        geochunk.NumNormals = dataview.getUint32(p, true);
-                        p += 4;
+                        geochunk.NumNormals = dataview.getUint32([p, p += 4][0], true);
 
                         if (geochunk.numVertices != geochunk.NumNormals) {
                             throw new Error("geochunk.numVertices != geochunk.NumNormal =" + geochunk.NumNormals);
@@ -907,9 +837,8 @@ void function (TeaJs) {
 
                         geochunk.normals = new Float32Array(geochunk.NumNormals * 3);
 
-                        for (var id = 0 ; id < geochunk.NumNormals * 3 ; ++id) {
-                            geochunk.normals[id] = dataview.getFloat32(p, true);
-                            p += 4;
+                        for (var id = 0 ; id < geochunk.NumNormals * 3 ; id++) {
+                            geochunk.normals[id] = dataview.getFloat32([p, p += 4][0], true);
                         }
 
                         geochunk.normalsBuffer = gl.createBuffer();
@@ -921,42 +850,34 @@ void function (TeaJs) {
                     case 'PTYP': // PLANE_TYPE
                         n++;
 
-                        var size = dataview.getUint32(p, true);
-                        p += 4;
-
-                        if (dataview.getUint32(p, true) != 4) // == Triangles
+                        var size = dataview.getUint32([p, p += 4][0], true);
+                        if (dataview.getUint32([p, p += size * 4][0], true) != 4) // == Triangles
                         {
                             throw new Error("dataview.getUint32( p ) != 4");
                         }
-
-                        p += size * 4;
                         break;
-                    case 'PCNT': // primitives count
+                    case 'PCNT':
+                        // 图元数量
                         n++;
 
-                        var size = dataview.getUint32(p, true);
-                        p += 4;
-
+                        var size = dataview.getUint32([p, p += 4][0], true);
                         if (size == 1) {
-                            geochunk.numTriangles = (dataview.getUint32(p, true)) / 3;
-                            p += 4;
+                            geochunk.numTriangles = (dataview.getUint32([p, p += 4][0], true)) / 3;
                         }
                         else {
                             geochunk.numTriangles = size;
                             p += size * 4;
                         }
                         break;
-                    case 'PVTX': // primitives vertices
+                    case 'PVTX':
+                        // 顶点索引
                         n++;
 
-                        var size = dataview.getUint32(p, true);
-                        p += 4;
-
+                        var size = dataview.getUint32([p, p += 4][0], true);
                         geochunk.triangles = new Uint16Array(size);
 
                         for (var i = 0 ; i < size ; i++) {
-                            geochunk.triangles[i] = dataview.getUint16(p, true);
-                            p += 2;
+                            geochunk.triangles[i] = dataview.getUint16([p, p += 2][0], true);
                         }
 
                         if (size / 3 != geochunk.numTriangles) {
@@ -973,104 +894,78 @@ void function (TeaJs) {
                         // links every vertex to a matrix
                         n++;
 
-                        var size = dataview.getUint32(p, true);
-                        p += 4;
+                        var size = dataview.getUint32([p, p += 4][0], true);
 
                         if (geochunk.numVertices != size) {
                             throw new Error("geochunk.numVertices != size");
                         }
 
                         geochunk.vertexGroups = new Uint8Array(size);
-                        for (var i = 0 ; i < size ; ++i) {
-                            geochunk.vertexGroups[i] = dataview.getInt8(p, true);
-                            p += 1;
+                        for (var i = 0 ; i < size ; i++) {
+                            geochunk.vertexGroups[i] = dataview.getInt8([p, p++][0], true);
                         }
                         break;
                     case 'MTGC': // group matrix counts
                         // this is the number of vertices defined by GNDX for each matrix
                         n++;
 
-                        geochunk.numGroups = dataview.getUint32(p, true);
-                        p += 4;
-
+                        geochunk.numGroups = dataview.getUint32([p, p += 4][0], true);
                         geochunk.groups = new Uint32Array(geochunk.numGroups);
                         for (var i = 0 ; i < geochunk.numGroups ; i++) {
-                            geochunk.groups[i] = dataview.getInt32(p, true);
-                            p += 4;
+                            geochunk.groups[i] = dataview.getInt32([p, p += 4][0], true);
                         }
                         break;
-                    case 'MATS': // matrices
+                    case 'MATS':
+                        // 矩阵信息
                         n++;
 
-                        geochunk.numMatrixGroups = dataview.getUint32(p, true);
-                        p += 4;
-
+                        geochunk.numMatrixGroups = dataview.getUint32([p, p += 4][0], true);
                         geochunk.matrixGroups = new Int32Array(geochunk.numMatrixGroups);
                         for (var i = 0 ; i < geochunk.numMatrixGroups ; i++) {
-                            geochunk.matrixGroups[i] = dataview.getInt32(p, true);
-                            p += 4;
+                            geochunk.matrixGroups[i] = dataview.getInt32([p, p += 4][0], true);
                         }
                         break;
                     default:
-                        var size = dataview.getUint32(p, true);
-                        p += 4 + size;
+                        var size = dataview.getUint32([p, p += 4 + size][0], true);
                         break;
                 }
             }
 
             if (p < inPos + inSize) {
-                geochunk.materialID = dataview.getUint32(p, true);
-                p += 4 * 3;
-                geochunk.boundsRadius = dataview.getFloat32(p, true);
-                p += 4;
+                geochunk.materialID = dataview.getUint32([p, p += 4 * 3][0], true);
+                geochunk.boundsRadius = dataview.getFloat32([p, p += 4][0], true);
 
                 geochunk.mins = new Float32Array(3);
                 geochunk.maxs = new Float32Array(3);
 
                 for (var i = 0 ; i < 3 ; i++) {
-                    geochunk.mins[i] = dataview.getFloat32(p, true);
-                    p += 4;
+                    geochunk.mins[i] = dataview.getFloat32([p, p += 4][0], true);
                 }
 
                 for (var i = 0 ; i < 3 ; i++) {
-                    geochunk.maxs[i] = dataview.getFloat32(p, true);
-                    p += 4;
+                    geochunk.maxs[i] = dataview.getFloat32([p, p += 4][0], true);
                 }
 
-                //	struct AnimExtent{
-                //		D3DXVECTOR3		MinimumExtent;
-                //		D3DXVECTOR3		MaximumExtent;
-                //		float			BoundsRadius;	
-                //	};
-                geochunk.numAnimExtent = dataview.getUint32(p, true);
-                p += 4;
-
+                geochunk.numAnimExtent = dataview.getUint32([p, p += 4][0], true);
                 geochunk.animExtents = new Float32Array(7 * geochunk.numAnimExtent);
                 for (var j = 0 ; j < geochunk.numAnimExtent ; j++) {
-                    for (var i = 0 ; i < 7 ; ++i) {
-                        geochunk.animExtents[j * 7 + i] = dataview.getFloat32(p, true);
-                        p += 4;
+                    for (var i = 0 ; i < 7 ; i++) {
+                        geochunk.animExtents[j * 7 + i] = dataview.getFloat32([p, p += 4][0], true);
                     }
                 }
 
-                var tag = dataview.getString(p, 4);
-                p += 4;
+                var tag = dataview.getString([p, p += 4][0], 4);
 
                 if (tag == 'UVAS') {
-                    var uvas_size = dataview.getUint32(p, true); // no skip
-                    p += 4;
+                    var uvas_size = dataview.getUint32([p, p += 4][0], true); // no skip
+                    if (dataview.getString([p, p += 4][0], 4) == 'UVBS') {
+                        // 贴图坐标
 
-                    if (dataview.getString(p, 4) == 'UVBS') {
-                        p += 4;
-
-                        var size = dataview.getUint32(p, true);
-                        p += 4;
-
+                        var size = dataview.getUint32([p, p += 4][0], true);
                         geochunk.uvs = new Float32Array(size * 2);
 
-                        for (var i = 0 ; i < size * 2 ; ++i) {
-                            geochunk.uvs[i] = dataview.getFloat32(p, true);
-                            p += 4;
+                        for (var i = 0 ; i < size * 2 ; i++) {
+                            geochunk.uvs[i] = dataview.getFloat32([p, p += 4][0], true);
                         }
 
                         geochunk.uvsBuffer = gl.createBuffer();
@@ -1085,24 +980,21 @@ void function (TeaJs) {
         }
 
         function mdx_read_bone(dataview, inPos, inSize) {
+            /// <summary>读取骨骼信息</summary>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
 
             var bone = new Bone();
 
             var ireader = 0;
 
-            bone.boneName = dataview.getString(p, 80);
-            p += 80;
-
-            bone.objectID = dataview.getUint32(p, true);
-            p += 4;
-
-            bone.parentID = dataview.getInt32(p, true);
-            p += 4;
-
-            bone.nodeType = dataview.getUint32(p, true);
-            p += 4;
-
+            bone.boneName = dataview.getString([p, p += 80][0], 80);
+            bone.objectID = dataview.getUint32([p, p += 4][0], true);
+            bone.parentID = dataview.getInt32([p, p += 4][0], true);
+            bone.nodeType = dataview.getUint32([p, p += 4][0], true);
             bone.keyFrameCount = [];
             bone.lineType = [];
             bone.keyFrames = [];
@@ -1110,7 +1002,7 @@ void function (TeaJs) {
             var nextP = inPos + inSize;
 
             while ((p < inPos + inSize) && (ireader < 3)) {
-                var tag = dataview.getString(p, 4);
+                var tag = dataview.getString([p, p += 4][0], 4);
 
                 var framesType = -1;
                 var vectorCount = -1;
@@ -1120,7 +1012,6 @@ void function (TeaJs) {
                     break;
                 }
 
-                p += 4;
                 ireader++;
                 var tagList = ["KGTR", 3,//transfer
                                "KGRT", 4,//rotate
@@ -1134,11 +1025,8 @@ void function (TeaJs) {
                 }
 
                 if (framesType != -1) {
-                    bone.keyFrameCount[framesType] = dataview.getUint32(p, true);
-                    p += 4;
-
-                    bone.lineType[framesType] = dataview.getUint32(p, true);
-                    p += 4 * 2;
+                    bone.keyFrameCount[framesType] = dataview.getUint32([p, p += 4][0], true);
+                    bone.lineType[framesType] = dataview.getUint32([p, p += 4 * 2][0], true);
 
                     bone.keyFrames[framesType] = [];
                     if (bone.lineType[framesType] > LineType.LINEAR)//non linear trasfer
@@ -1148,18 +1036,10 @@ void function (TeaJs) {
 
                             frame.type = "MDX_NoLinearKeyFrame" + vectorCount;
 
-                            frame.frameNum = dataview.getInt32(p, true);
-                            p += 4;
-
-                            frame.vec = dataview.getVectorN(p, vectorCount);
-                            p += 4 * vectorCount;
-
-                            frame.inTan = dataview.getVectorN(p, vectorCount);
-                            p += 4 * vectorCount;
-
-                            frame.outTan = dataview.getVectorN(p, vectorCount);
-                            p += 4 * vectorCount;
-
+                            frame.frameNum = dataview.getInt32([p, p += 4][0], true);
+                            frame.vec = dataview.getVectorN([p, p += 4 * vectorCount][0], vectorCount);
+                            frame.inTan = dataview.getVectorN([p, p += 4 * vectorCount][0], vectorCount);
+                            frame.outTan = dataview.getVectorN([p, p += 4 * vectorCount][0], vectorCount);
                             bone.keyFrames[framesType][i] = frame;
                         }
                     }
@@ -1169,12 +1049,8 @@ void function (TeaJs) {
 
                             frame.type = "LinearKeyFrame" + vectorCount;
 
-                            frame.frameNum = dataview.getInt32(p, true);
-                            p += 4;
-
-                            frame.vec = dataview.getVectorN(p, vectorCount);
-                            p += 4 * vectorCount;
-
+                            frame.frameNum = dataview.getInt32([p, p += 4][0], true);
+                            frame.vec = dataview.getVectorN([p, p += 4 * vectorCount][0], vectorCount);
                             bone.keyFrames[framesType][i] = frame;
                         }
                     }
@@ -1182,56 +1058,45 @@ void function (TeaJs) {
             }
 
             if (p < inPos + inSize - 4) {
-                bone.geosetID = dataview.getUint32(p, true);
-                p += 4;
-                bone.geosetAnimID = dataview.getUint32(p, true);
-                p += 4;
+                bone.geosetID = dataview.getUint32([p, p += 4][0], true);
+                bone.geosetAnimID = dataview.getUint32([p, p += 4][0], true);
             }
-
             return bone;
         }
 
         function mdx_read_material(dataview, inPos, inSize) {
+            /// <summary>读取纹理信息</summary>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
             var material = new Material();
             p += 8;
-            if (dataview.getString(p, 4) != "LAYS") {
+            if (dataview.getString([p, p += 4][0], 4) != "LAYS") {
                 throw new Error("dataview.getString( p , 4 ) != LAYS");
                 return;
             }
-            p += 4;
-            material.numLayers = dataview.getUint32(p, true);
-            p += 4;
-
+            material.numLayers = dataview.getUint32([p, p += 4][0], true);
             material.layers = [];
 
-            for (var i = 0 ; i < material.numLayers ; ++i) {
+            for (var i = 0 ; i < material.numLayers ; i++) {
                 var startP = p;
                 material.layers[i] = new MaterialLayer();
-                material.layers[i].layersSize = dataview.getUint32(p, true);
-                p += 4;
-                material.layers[i].filterMode = dataview.getUint32(p, true);
-                p += 4;
-                material.layers[i].shading = dataview.getUint32(p, true);
-                p += 4;
-                material.layers[i].textureID = dataview.getUint32(p, true);
-                p += 4;
-                material.layers[i].unk5 = dataview.getInt32(p, true);
-                p += 4;
-                material.layers[i].unk6 = dataview.getInt32(p, true);
-                p += 4;
-                material.layers[i].alpha = dataview.getFloat32(p, true);
-                p += 4;
+                material.layers[i].layersSize = dataview.getUint32([p, p += 4][0], true);
+                material.layers[i].filterMode = dataview.getUint32([p, p += 4][0], true);
+                material.layers[i].shading = dataview.getUint32([p, p += 4][0], true);
+                material.layers[i].textureID = dataview.getUint32([p, p += 4][0], true);
+                material.layers[i].unk5 = dataview.getInt32([p, p += 4][0], true);
+                material.layers[i].unk6 = dataview.getInt32([p, p += 4][0], true);
+                material.layers[i].alpha = dataview.getFloat32([p, p += 4][0], true);
 
-                if (dataview.getString(p, 4) == 'KMTA') {
-                    p += 4;
+                if (dataview.getString([p, p += 4][0], 4) == 'KMTA') {
 
                     material.layers[i].existKMTA = true;
                     material.layers[i].KMTA = new MaterialLayoutAlpha();
-                    material.layers[i].KMTA.chunkNum = dataview.getUint32(p, true);
-                    p += 4;
-                    material.layers[i].KMTA.LineType = dataview.getUint32(p, true);
-                    p += 4;
+                    material.layers[i].KMTA.chunkNum = dataview.getUint32([p, p += 4][0], true);
+                    material.layers[i].KMTA.LineType = dataview.getUint32([p, p += 4][0], true);
                     material.layers[i].KMTA.data = dataview.buffer.slice(p, material.layers[i].layersSize - (p - startP));
                 }
                 else {
@@ -1239,11 +1104,15 @@ void function (TeaJs) {
                 }
                 p = startP += material.layers[i].layersSize;
             }
-
             return material;
         }
 
         function loadModelFromBuff(databuff, modelUrl, webgl) {
+            /// <summary>从ArrayBuffer加载模型</summary>
+            /// <param name="databuff" type="ArrayBuffer">二进制缓冲数组</param>
+            /// <param name="modelUrl" type="String">模型路径</param>
+            /// <param name="webgl" type="WebGLRenderingContext">WebGL上下文</param>
+            
             gl = webgl;
 
             modelBaseUrl = modelUrl;
@@ -1255,7 +1124,7 @@ void function (TeaJs) {
                 var str = new String();
 
                 var u8 = new Uint8Array(1);
-                for (var i = pos ; i < pos + length ; ++i) {
+                for (var i = pos ; i < pos + length ; i++) {
                     u8[0] = this.getUint8(i);
                     if (u8[0] == 0) break;
                     str += String.fromCharCode(u8[0]);
@@ -1266,7 +1135,7 @@ void function (TeaJs) {
             dataview.getVectorN = function (pos, n) {
                 var vec = new Float32Array(n);
 
-                for (var i = 0 ; i < n ; ++i) {
+                for (var i = 0 ; i < n ; i++) {
                     vec[i] = this.getFloat32(pos + i * 4, true);
                 }
 
@@ -1278,19 +1147,15 @@ void function (TeaJs) {
             var p = 0; //数据指针
             var totalSize = databuff.byteLength;
 
-            var mdx_flag = dataview.getString(p, 4);
+            var mdx_flag = dataview.getString([p, p += 4][0], 4);
 
             if (mdx_flag != "MDLX") {
                 throw new TypeError("数据标识错误");
             }
 
-            p += 4;
-
             while (p < totalSize) {
-                var chunkTag = dataview.getString(p, 4);
-                p += 4;
-                var chunkSize = dataview.getUint32(p, true);
-                p += 4;
+                var chunkTag = dataview.getString([p, p += 4][0], 4);
+                var chunkSize = dataview.getUint32([p, p += 4][0], true);
 
                 var funList = ["HELP", "readSkeletonHelpers",
                                "BONE", "readSkeletonBones",
@@ -1306,7 +1171,7 @@ void function (TeaJs) {
                         //attachs.Read(p,size);
                         break;
                     case 'VERS':
-                        mdxModel.version = dataview.getUint32(p, true);
+                        //mdxModel.version = dataview.getUint32(p, true);
                         break;
                     case 'MODL':
                         break;
@@ -1325,78 +1190,85 @@ void function (TeaJs) {
                         }
                         break;
                 }
-
                 p += chunkSize;
             }
+
+            // 删除不使用的变量
+            var deleteList = ["bitmapsCount",
+                              "bonesCount",
+                              "meshesCount",
+                              "geosetAnimCount",
+                              "materialsCount",
+                              "pivotPointsCount",
+                              "sequencesCount"];
+            for (var i in deleteList) {
+                delete mdxModel[deleteList[i]];
+            }
+
             return mdxModel;
         }
 
         MDX.readGeosets = function (mdxModel, dataview, inPos, inSize) {
-            mdxModel.numChunks = 0;
-            mdxModel.chunks = [];
+            /// <summary>读取几何数据</summary>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
+            mdxModel.meshesCount = 0;
+            mdxModel.meshes = [];
 
             var p = inPos;
 
             while (p < inPos + inSize) {
-                var geochunkSize = dataview.getUint32(p, true) - 4;
-                p += 4;
-                mdxModel.chunks[mdxModel.numChunks] = mdx_read_geochunk(dataview, p, geochunkSize);
-                p += geochunkSize;
-                mdxModel.numChunks++;
+                var geochunkSize = dataview.getUint32([p, p += 4][0], true) - 4;
+                mdxModel.meshes[mdxModel.meshesCount] = mdx_read_geochunk(dataview, [p, p += geochunkSize][0], geochunkSize);
+                mdxModel.meshes[mdxModel.meshesCount]._model = mdxModel;
+                mdxModel.meshesCount++;
             }
         };
 
         MDX.readSkeletonGeosetsAnims = function (mdxModel, dataview, inPos, inSize) {
+            /// <summary>读取几何动画</summary>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
 
-            mdxModel.numGeosetAnim = 0;
+            mdxModel.geosetAnimCount = 0;
             mdxModel.geosetAnim = [];
             mdxModel.geosetAlpha = [];
 
             while (p < inPos + inSize) {
                 var nextp = p;
 
-                var size = dataview.getUint32(p, true);
-                p += 4;
+                var size = dataview.getUint32([p, p += 4][0], true);
                 nextp += size;
 
                 var geoa = new GEOA();
 
-                geoa.unk0 = dataview.getFloat32(p, true);
-                p += 4;
-                geoa.type = dataview.getInt32(p, true);
-                p += 4;
-                geoa.blue = dataview.getFloat32(p, true);
-                p += 4;
-                geoa.green = dataview.getFloat32(p, true);
-                p += 4;
-                geoa.red = dataview.getFloat32(p, true);
-                p += 4;
-                geoa.GeosetID = dataview.getUint32(p, true);
-                p += 4;
+                geoa.unk0 = dataview.getFloat32([p, p += 4][0], true);
+                geoa.type = dataview.getInt32([p, p += 4][0], true);
+                geoa.blue = dataview.getFloat32([p, p += 4][0], true);
+                geoa.green = dataview.getFloat32([p, p += 4][0], true);
+                geoa.red = dataview.getFloat32([p, p += 4][0], true);
+                geoa.geosetID = dataview.getUint32([p, p += 4][0], true);
 
-                mdxModel.geosetAnim[mdxModel.numGeosetAnim] = geoa;
+                mdxModel.geosetAnim[mdxModel.geosetAnimCount] = geoa;
 
                 var kgao = new KGAO();
 
-                if (dataview.getString(p, 4) == 'KGAO') {
-                    p += 4;
-
-                    kgao.chunkNum = dataview.getInt32(p, true);
-                    p += 4;
-                    kgao.lineType = dataview.getInt32(p, true);
-                    p += 4;
-                    p += 4;
+                if (dataview.getString([p, p += 4][0], 4) == 'KGAO') {
+                    kgao.chunkNum = dataview.getInt32([p, p += 4][0], true);
+                    kgao.lineType = dataview.getInt32([p, p += 8][0], true);
 
                     kgao.data = [];
-                    for (var chunkI = 0; chunkI < kgao.chunkNum ; ++chunkI) {
+                    for (var chunkI = 0; chunkI < kgao.chunkNum ; chunkI++) {
                         var a = new AnimAlpha();
-                        a.frameNum = dataview.getInt32(p, true);
-                        p += 4;
-
-                        a.alphaValue = dataview.getFloat32(p, true);
-                        p += 4;
-
+                        a.frameNum = dataview.getInt32([p, p += 4][0], true);
+                        a.alphaValue = dataview.getFloat32([p, p += 4][0], true);
                         kgao.data[chunkI] = a;
                     }
                 }
@@ -1405,159 +1277,150 @@ void function (TeaJs) {
                     kgao.lineType = 0;
                     kgao.data = null;
                 }
-                mdxModel.geosetAlpha[mdxModel.numGeosetAnim] = kgao;
-                mdxModel.numGeosetAnim++;
+                mdxModel.geosetAlpha[mdxModel.geosetAnimCount] = kgao;
+                mdxModel.geosetAnimCount++;
                 p = nextp;
             }
         };
 
         MDX.readSequences = function (mdxModel, dataview, inPos, inSize) {
             /// <summary>读取序列动画数据</summary>
-            /// <param name="mdxModel" type="Object">模型对象</param>
-            /// <param name="dataview" type="Object"></param>
-            /// <param name="inPos" type="Number"></param>
-            /// <param name="inSize" type="Number"></param>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
 
             var p = inPos;
 
             // 序列动画数量
-            mdxModel.numSequences = inSize / sequenceAnimStructSize;
+            mdxModel.sequencesCount = inSize / sequenceAnimStructSize;
 
             // 定义序列动画数组
             mdxModel.sequences = [];
 
-            for (var i = 0 ; i < mdxModel.numSequences ; i++) {
+            var sequence = null;
+            for (var i = 0 ; i < mdxModel.sequencesCount ; i++) {
                 mdxModel.sequences[i] = new SequenceAnim();
+                sequence = mdxModel.sequences[i];
 
-                mdxModel.sequences[i].name = dataview.getString(p, 80);
-                p += 80;
-
-                mdxModel.sequences[i].startFrame = dataview.getInt32(p, true);
-                p += 4;
-
-                mdxModel.sequences[i].endFrame = dataview.getInt32(p, true);
-                p += 4;
-
-                mdxModel.sequences[i].moveSpeed = dataview.getInt32(p, true);
-                p += 4;
-
-                mdxModel.sequences[i].nonLooping = dataview.getInt32(p, true);
-                p += 4;
-
-                mdxModel.sequences[i].rarity = dataview.getInt32(p, true);
-                p += 4;
-
-                mdxModel.sequences[i].unk6 = dataview.getInt32(p, true);
-                p += 4;
-
-                mdxModel.sequences[i].boundsRadius = dataview.getFloat32(p, true);
-                p += 4;
-
-                mdxModel.sequences[i].mins = dataview.getVectorN(p, 3);
-                p += 4 * 3;
-
-                mdxModel.sequences[i].maxs = dataview.getVectorN(p, 3);
-                p += 4 * 3;
+                sequence.name = dataview.getString([p, p += 80][0], 80);
+                sequence.startFrame = dataview.getInt32([p, p += 4][0], true);
+                sequence.endFrame = dataview.getInt32([p, p += 4][0], true);
+                sequence.moveSpeed = dataview.getInt32([p, p += 4][0], true);
+                sequence.nonLooping = dataview.getInt32([p, p += 4][0], true);
+                sequence.rarity = dataview.getInt32([p, p += 4][0], true);
+                sequence.unk6 = dataview.getInt32([p, p += 4][0], true);
+                sequence.boundsRadius = dataview.getFloat32([p, p += 4][0], true);
+                sequence.mins = dataview.getVectorN([p, p += 4 * 3][0], 3);
+                sequence.maxs = dataview.getVectorN([p, p += 4 * 3][0], 3);
             }
         };
 
         MDX.readSkeletonHelpers = function (mdxModel, dataview, inPos, inSize) {
+            /// <summary>读取骨骼数据的工具函数</summary>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
 
-            if (mdxModel.numBone == undefined) {
-                mdxModel.numBone = 0;
-
+            // 如果模型没有定义骨骼
+            if (typeof mdxModel.bonesCount == "undefined") {
+                mdxModel.bonesCount = 0;
                 mdxModel.bones = [];
             }
 
             while (p < inPos + inSize) {
-                var size = dataview.getUint32(p, true);
-                p += 4;
-
-                mdxModel.bones[mdxModel.numBone] = mdx_read_bone(dataview, p, size);
-
-                mdxModel.numBone++;
-
-                p += size - 4;
+                var size = dataview.getUint32([p, p += 4][0], true);
+                mdxModel.bones[mdxModel.bonesCount] = mdx_read_bone(dataview, [p, p += size - 4][0], size);
+                mdxModel.bonesCount++;
             }
 
         };
 
         MDX.readSkeletonBones = function (mdxModel, dataview, inPos, inSize) {
+            /// <summary>读取骨骼数据</summary>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
 
-            if (mdxModel.numBone == undefined) {
-                mdxModel.numBone = 0;
-
+            if (mdxModel.bonesCount == undefined) {
+                mdxModel.bonesCount = 0;
                 mdxModel.bones = [];
             }
 
             while (p < inPos + inSize) {
-                var size = dataview.getUint32(p, true);
-                p += 4;
-
-                mdxModel.bones[mdxModel.numBone] = mdx_read_bone(dataview, p, size + 4);
-
-                mdxModel.numBone++;
-
-                p += size + 4;
+                var size = dataview.getUint32([p, p += 4][0], true);
+                mdxModel.bones[mdxModel.bonesCount] = mdx_read_bone(dataview, [p, p += size + 4][0], size + 4);
+                mdxModel.bonesCount++;
             }
         };
 
         MDX.readMaterialmap = function (mdxModel, dataview, inPos, inSize) {
+            /// <summary>读取多级材质</summary>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
 
-            mdxModel.numMaterials = 0;
-
+            mdxModel.materialsCount = 0;
             mdxModel.materials = [];
 
             while (p < inPos + inSize) {
-                var size = dataview.getUint32(p, true) - 4;
-                p += 4;
-
-                mdxModel.materials[mdxModel.numMaterials] = mdx_read_material(dataview, p, size);
-                p += size;
-
-                mdxModel.numMaterials++;
+                var size = dataview.getUint32([p, p += 4][0], true) - 4;
+                mdxModel.materials[mdxModel.materialsCount] = mdx_read_material(dataview, [p, p += size][0], size);
+                mdxModel.materialsCount++;
             }
         };
 
         MDX.readSkeletonPivotpoints = function (mdxModel, dataview, inPos, inSize) {
+            /// <summary>读取骨骼顶点</summary>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
 
-            mdxModel.numPivotPoint = inSize / (3 * 4);
+            mdxModel.pivotPointsCount = inSize / (3 * 4);
             mdxModel.pivotPoints = [];
 
-            for (var i = 0 ; i < mdxModel.numPivotPoint ; i++) {
-                mdxModel.pivotPoints[i] = dataview.getVectorN(p, 3);
-                p += 3 * 4;
+            for (var i = 0 ; i < mdxModel.pivotPointsCount ; i++) {
+                mdxModel.pivotPoints[i] = dataview.getVectorN([p, p += 3 * 4][0], 3);
             }
         };
 
         MDX.readTextures = function (mdxModel, dataview, inPos, inSize) {
+            /// <summary>读取材质</summary>
+            /// <param name="mdxModel" type="Model">模型对象</param>
+            /// <param name="dataview" type="Object">数据视图对象</param>
+            /// <param name="inPos" type="Number">起始数据索引</param>
+            /// <param name="inSize" type="Number">数据长度</param>
+
             var p = inPos;
 
-            // 读取数据块
-            mdxModel.numBitmaps = inSize / (256 + 4 * 3);
+            // 计算贴图数量
+            mdxModel.bitmapsCount = inSize / (256 + 4 * 3);
 
             // 定义模型贴图数组
             mdxModel.bitmaps = [];
 
-            for (var i = 0 ; i < mdxModel.numBitmaps ; ++i) {
+            for (var i = 0 ; i < mdxModel.bitmapsCount ; i++) {
                 var bitmap = new TextureBitmap();
 
-                bitmap.replaceableID = dataview.getInt32(p, true);
-                p += 4;
-                bitmap.texturePath = dataview.getString(p, 256);
-                p += 256;
-                bitmap.unk0 = dataview.getInt32(p, true);
-                p += 4;
-                bitmap.unk1 = dataview.getInt32(p, true);
-                p += 4;
-                if (bitmap.replaceableID == 2) {
-                    bitmap.texturePath = "ReplaceableTextures\\TeamGlow\\TeamGlow00.blp";
-                }
-
+                bitmap.replaceableID = dataview.getInt32([p, p += 4][0], true);
+                bitmap.texturePath = dataview.getString([p, p += 256][0], 256);
+                bitmap.unk0 = dataview.getInt32([p, p += 4][0], true);
+                bitmap.unk1 = dataview.getInt32([p, p += 4][0], true);
+                //if (bitmap.replaceableID == 2) {
+                //    bitmap.texturePath = "ReplaceableTextures\\TeamGlow\\TeamGlow00.blp";
+                //}
                 if (bitmap.texturePath != "") {
                     //纹理
                     var tex = gl.createTexture();
@@ -1568,13 +1431,10 @@ void function (TeaJs) {
                     tex.image.onload = function () {
                         loadOver.apply(mdxModel, [this.type, this.src, this.texture]);
                     };
-
-                    mdxModel.loadingObject[tex.image.src] = true;
-
+                    mdxModel.resources[tex.image.src] = true;
                     bitmap.texture = tex;
                 }
-
-                mdxModel.bitmaps[i] = bitmap;
+                mdxModel.bitmaps.push(bitmap);
             }
         };
 
