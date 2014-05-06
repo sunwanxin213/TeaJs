@@ -1,0 +1,24 @@
+﻿// TeaJs可能用到的文件格式及MIME类型设置
+
+// 音频相关
+.ogg	audio/ogg
+.mp3	audio/mpeg
+.wav	audio/wav
+.aac	audio/aac
+
+// 视频相关
+.mp4	video/mp4
+.ogv	video/ogg
+.webm	video/webm
+
+// 3D模型相关
+.obj	application/octet-stream
+.mdx	application/octet-stream
+.dds	application/octet-stream
+
+// 3D着色器相关
+.glvs	x-shader/x-vertex
+.glfs	x-shader/x-fragment
+
+// 其他
+.bms	text/plain
