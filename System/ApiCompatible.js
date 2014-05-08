@@ -207,4 +207,33 @@ void function (window) {
 
         return tempStr;
     };
+
+    DataView && (DataView.prototype.getString = function (pos, length) {
+        /// <summary>获取特定字符串</summary>
+        /// <param name="pos" type="Number">起始点</param>
+        /// <param name="length" type="Number">获取长度</param>
+        /// <returns type="String"></returns>
+
+        var str = "";
+        var u8 = new Uint8Array(1);
+        for (var i = pos; i < pos + length; i++) {
+            u8[0] = this.getUint8(i);
+            if (u8[0] == 0) break;
+            str += String.fromCharCode(u8[0]);
+        }
+        return str;
+    });
+
+    DataView && (DataView.prototype.getVectorN = function (pos, n) {
+        /// <summary>获取向量N</summary>
+        /// <param name="pos" type="Number">起始点</param>
+        /// <param name="n" type="Number">获取长度</param>
+        /// <returns type="Float32Array"></returns>
+
+        var vec = new Float32Array(n);
+        for (var i = 0 ; i < n ; i++) {
+            vec[i] = this.getFloat32(pos + i * 4, true);
+        }
+        return vec;
+    });
 }(window);

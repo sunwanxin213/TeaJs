@@ -34,7 +34,7 @@ void function (TeaJs) {
         // 使用Ajax加载Mdx格式模型文件
         TeaJs.loadFile(fileName, true, "arraybuffer", function (obj) {
             // 解析模型
-            var model = analyzer(obj, fileName.substr(0, fileName.lastIndexOf("/") + 1), gl);
+            var model = analyzer(obj, fileName.substr(0, fileName.lastIndexOf("/") + 1), gl, _this);
 
             model.format = "MDX";
 
@@ -42,7 +42,11 @@ void function (TeaJs) {
             _this.itemList.push({
                 name: name,
                 object: model,
-                unload: null
+                unload: function () {
+                    for (var i = 0; i < model.bitmaps.length; i++) {
+                        _this._manager.remove(model.bitmaps[i].textureUrl);
+                    }
+                }
             });
 
             // 执行回调函数
@@ -54,6 +58,8 @@ void function (TeaJs) {
         var MDX = {};
 
         var gl = null;
+
+        var loaderManager = null;
 
         var modelBaseUrl = "";
 
@@ -162,8 +168,6 @@ void function (TeaJs) {
             /// <summary>MDX模型</summary>
 
             var _this = this;
-
-            this.resources = {};
 
             // 当前帧索引
             var currentFrame = 0;
@@ -702,7 +706,6 @@ void function (TeaJs) {
             /// <param name="obj" type="Object">对象</param>
 
             if (type == "texture") {
-                this.resources[name] = obj.image;
                 gl.bindTexture(gl.TEXTURE_2D, obj);
 
                 gl.pixelStorei(gl.UNPACK_ALIGNMENT, true);
@@ -1107,12 +1110,14 @@ void function (TeaJs) {
             return material;
         }
 
-        function loadModelFromBuff(databuff, modelUrl, webgl) {
+        function loadModelFromBuff(databuff, modelUrl, webgl, loader) {
             /// <summary>从ArrayBuffer加载模型</summary>
             /// <param name="databuff" type="ArrayBuffer">二进制缓冲数组</param>
             /// <param name="modelUrl" type="String">模型路径</param>
             /// <param name="webgl" type="WebGLRenderingContext">WebGL上下文</param>
-            
+
+            loaderManager = loader;
+
             gl = webgl;
 
             modelBaseUrl = modelUrl;
@@ -1424,16 +1429,31 @@ void function (TeaJs) {
                 if (bitmap.texturePath != "") {
                     //纹理
                     var tex = gl.createTexture();
-                    tex.image = new Image();
-                    tex.image.src = modelBaseUrl + bitmap.texturePath;
-                    tex.image.type = "texture";
-                    tex.image.texture = tex;
-                    tex.image.onload = function () {
-                        loadOver.apply(mdxModel, [this.type, this.src, this.texture]);
-                    };
-                    mdxModel.resources[tex.image.src] = true;
-                    bitmap.texture = tex;
+                    switch (bitmap.texturePath.split(".")[bitmap.texturePath.split(".").length - 1].toLowerCase()) {
+                        case "png":
+                        case "jpg":
+                        case "jpeg":
+                        case "bmp":
+                        case "gif":
+                            tex.image = new Image();
+                            tex.image.src = modelBaseUrl + bitmap.texturePath;
+                            tex.image.type = "texture";
+                            tex.image.texture = tex;
+                            tex.image.onload = function () {
+                                loadOver.apply(mdxModel, [this.type, this.src, this.texture]);
+                            };
+                            bitmap.texture = tex;
+                            break;
+                        case "dds":
+                        case "blp":
+                            var bit = bitmap;
+                            loaderManager._manager.load(bit.texturePath, modelBaseUrl + bit.texturePath, function (texture) {
+                                bit.texture = texture;
+                            });
+                            break;
+                    }
                 }
+                bitmap.textureUrl = modelBaseUrl + bitmap.texturePath;
                 mdxModel.bitmaps.push(bitmap);
             }
         };
