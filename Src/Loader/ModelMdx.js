@@ -1155,7 +1155,7 @@ void function (TeaJs) {
             var mdx_flag = dataview.getString([p, p += 4][0], 4);
 
             if (mdx_flag != "MDLX") {
-                throw new TypeError("The data format is not supported.");
+                throw new TypeError("数据标识错误");
             }
 
             while (p < totalSize) {
@@ -1445,12 +1445,11 @@ void function (TeaJs) {
                             bitmap.texture = tex;
                             break;
                         case "dds":
+                        case "blp":
                             var bit = bitmap;
                             loaderManager._manager.load(bit.texturePath, modelBaseUrl + bit.texturePath, function (texture) {
                                 bit.texture = texture;
                             });
-                        case "blp":
-                            if (TeaJs.isDebug) console.error("暂不支持BLP贴图");
                             break;
                     }
                 }

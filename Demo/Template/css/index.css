@@ -1,0 +1,9 @@
+﻿#gameCanvas {
+    /*
+        标签: canvas
+        说明: 游戏画布标签样式 
+     */
+    margin: 0;
+    padding: 0;
+    background-color: rgb(100, 149, 237);
+}
