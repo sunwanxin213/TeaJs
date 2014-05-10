@@ -64,7 +64,9 @@ void function (window) {
     // 是否启用调试
     TeaJs.isDebug = false;
     // 框架版本
-    TeaJs.version = "0.1.5";
+    Object.defineProperty(TeaJs, "version", {
+        get: function () { return "0.1.5" }
+    });
 
     TeaJs.getQueryString = function (name) {
         /// <summary>获取页面参数</summary>
