@@ -1,0 +1,88 @@
+﻿* {
+    font-family: 'Microsoft YaHei UI','Microsoft YaHei','SimSun','Segoe UI','Lucida Grande',Verdana,Arial,Helvetica,sans-serif!important;
+}
+
+html, body {
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    padding-bottom: 50px;
+}
+
+.h1, h1.title, .topic h1.title {
+    font-size: 2.769em;
+    font-weight: normal;
+    font-family: 'Segoe UI','Lucida Grande',Verdana,Arial,Helvetica,sans-serif;
+    color: #000;
+}
+
+.namespace {
+    font-weight: bold;
+}
+
+    .namespace span {
+        margin-left: 15px;
+        color: #057e15;
+    }
+
+.extends .tips {
+    font-weight: bold;
+}
+
+.extends .name {
+    color: #ff6a00;
+    margin-left: 15px;
+}
+
+table, tbody {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+a {
+    text-decoration: none;
+    color: #03697a;
+}
+
+td, th {
+    border: 1px solid #dbdbdb;
+    margin: 10px;
+    padding: 10px 8px;
+}
+
+th {
+    background-color: #ededed;
+    color: #636363;
+    text-align: left;
+}
+
+td {
+    color: #2a2a2a;
+    vertical-align: top;
+}
+
+.function, .field {
+    display: none;
+}
+
+dt {
+    font-style: italic;
+}
+
+.type {
+    color: #ff6a00;
+    margin-left: 15px;
+}
+
+.readWrite {
+    color: #f00;
+    margin-left: 15px;
+}
+
+.default {
+    color: #00f;
+    margin-left: 15px;
+}

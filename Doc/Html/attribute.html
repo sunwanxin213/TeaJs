@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <script src="scripts/main.js"></script>
+    <link rel="stylesheet" href="styles/content.css" />
+    <script>
+        window.onload = function () {
+            var obj = JSON.parse(unescape(getQueryString("data")));
+            console.dir(obj);
+            setValueFromClass("title", obj.name + "字段");
+            setValueFromClass("namespace", "命名空间:<span>" + getQueryString("namespace") + "</span>");
+            setValueFromClass("description", obj.description);
+            setValueFromClass("type", obj.type, "inline");
+            setValueFromClass("readWrite", (obj.canGet && obj.canSet ? "读写" : obj.canGet ? "只读" : "只写"), "inline");
+            setValueFromClass("default", obj.default, "inline");
+        };
+
+        function setValueFromClass(className, value, display) {
+            var el = document.getElementsByClassName(className)[0];
+            el.innerHTML = value;
+            el.style.display = display || "block";
+        }
+
+        function goBack() {
+            history.go(-1);
+        }
+    </script>
+</head>
+<body>
+    <a href="javascript:goBack();"><<返回到类视图</a>
+    <h1 class="title"></h1>
+    <p class="namespace"></p>
+    <h2>说明</h2>
+    类型:<span class="type"></span><br />
+    权限:<span class="readWrite"></span><br />
+    默认值:<span class="default"></span>
+    <p class="description"></p>
+
+</body>
+</html>

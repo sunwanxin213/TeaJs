@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <style>
+        html, body {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        div {
+            line-height: 24px;
+            font-size: 24px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+    </style>
+    <script>
+        function change(url) {
+            document.getElementById("content").src = "class.html?class=" + url.replace("/", "gang");
+        }
+    </script>
+</head>
+<body>
+    <div style="width: 20%; height: 100%; float: left;">
+        <a href="javascript:change('Main');">TeaJs</a><br />
+        <a href="javascript:change('TeaJs/AudioContext');">....AudioContext</a><br />
+        <a href="javascript:change('TeaJs/C2Effect');">....C2Effect</a><br />
+    </div>
+    <iframe id="content" src="class.html" border="0" style="border: 0; float: left; width: 80%; height: 100%;"></iframe>
+</body>
+</html>

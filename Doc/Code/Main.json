@@ -1,0 +1,121 @@
+﻿{
+    "name": "TeaJs",
+    "namespace": "",
+    "extends": null,
+    "description": "TeaJs主入口",
+    "funs": [
+        {
+            "name": "TeaJs",
+            "description": "初始化TeaJs框架",
+            "constructor": false,
+            "params": [
+                {
+                    "name": "path",
+                    "type": "String",
+                    "description": "框架路径，用于框架自动引用文件，相对路径或绝对路径均可。",
+                    "optional": false
+                },
+                {
+                    "name": "isDebug",
+                    "type": "Boolean",
+                    "description": "是否启用调试模式，启用后效果为控制台输出信息。",
+                    "optional": true
+                },
+                {
+                    "name": "callback",
+                    "type": "Function",
+                    "description": "初始化完成后的回调函数",
+                    "optional": true
+                }
+            ],
+            "returns": null
+        },
+        {
+            "name": "getQueryString",
+            "description": "获取页面参数",
+            "constructor": false,
+            "params": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "description": "参数名称",
+                    "optional": false
+                }
+            ],
+            "returns": {
+                "type": "String",
+                "description": "获得到的页面参数"
+            }
+        },
+        {
+            "name": "loadFile",
+            "description": "加载文件",
+            "constructor": false,
+            "params": [
+                {
+                    "name": "url",
+                    "type": "String",
+                    "description": "文件地址",
+                    "optional": false
+                },
+                {
+                    "name": "syne",
+                    "type": "Boolean",
+                    "description": "是否异步加载",
+                    "optional": false
+                },
+                {
+                    "name": "type",
+                    "type": "String",
+                    "description": "Mime类型，可为null",
+                    "optional": false
+                },
+                {
+                    "name": "callback",
+                    "type": "Function",
+                    "description": "加载完成后的回调函数",
+                    "optional": false
+                },
+                {
+                    "name": "onerror",
+                    "type": "Function",
+                    "description": "自定义错误处理函数",
+                    "optional": true
+                }
+            ],
+            "returns": null
+        },
+        {
+            "name": "loadScript",
+            "constructor": false,
+            "description": "加载脚本",
+            "params": [
+                {
+                    "name": "src",
+                    "type": "String",
+                    "description": "文件地址",
+                    "optional": false
+                }
+            ],
+            "returns": null
+        }
+    ],
+    "attributes": [
+        {
+            "name": "isDebug",
+            "type": "Boolean",
+            "description": "是否启用调试模式",
+            "canGet": true,
+            "canSet": true,
+            "default": "false"
+        },
+        {
+            "name": "version",
+            "type": "String",
+            "description": "当前框架版本",
+            "canGet": true,
+            "canSet": false,
+            "default": "根据使用者版本而定"
+        }
+    ]
+}

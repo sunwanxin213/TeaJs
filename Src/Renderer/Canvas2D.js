@@ -68,7 +68,7 @@ void function (TeaJs) {
     };
 
     var textMetricElement = document.createElement("span");
-    textMetricElement.style.cssText = "position:absolute;top:-1000px;left:0;z-index:-1000;color:transparent;";
+    textMetricElement.style.cssText = "position:absolute;padding:0px;margin:0px;top:-1000px;left:0;z-index:-1000;color:transparent;";
     document.body.appendChild(textMetricElement);
     renderer.getTextHeight = function (str, font) {
         /// <summary>获取文本高度</summary>

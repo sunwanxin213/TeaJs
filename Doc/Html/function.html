@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <script src="scripts/main.js"></script>
+    <link rel="stylesheet" href="styles/content.css" />
+    <script>
+        var obj;
+        window.onload = function () {
+            obj = JSON.parse(unescape(getQueryString("data")));
+            setValueFromClass("title", obj.name + "方法");
+            setValueFromClass("description", obj.description);
+            setValueFromClass("namespace", "命名空间:<span>" + getQueryString("namespace") + "</span>");
+            setValueFromClass("constructor", obj.constructor ? "该方法为构造器，需要new后使用" : "该方法不是构造器，可直接调用");
+            if (!obj.params.length) setValueFromClass("params", "该方法没有参数。");
+            else {
+                var p = null;
+                var str = "";
+                for (var i = 0; i < obj.params.length; i++) {
+                    p = obj.params[i];
+                    str += "<dl><dt>" + p.name + "</dt><dd>可省略:" + (!p.optional ? "否" : "是") + "<br/>类型:<span class='type'>" + p.type + "</span><br/>" + p.description + "</dd></dl>";
+                }
+                setValueFromClass("params", str);
+            }
+
+            if (obj.returns) {
+                setValueFromClass("returns", "返回值<br/>类型:<span class='type'>" + obj.returns.type + "</span><br/>" + obj.returns.description);
+            } else {
+                setValueFromClass("returns", "该方法没有返回值。");
+            }
+        };
+
+        function setValueFromClass(className, value) {
+            var el = document.getElementsByClassName(className)[0];
+            el.innerHTML = value;
+            el.style.display = "block";
+        }
+
+        function goBack() {
+            history.go(-1);
+        }
+    </script>
+</head>
+<body>
+    <a href="javascript:goBack();"><<返回到类视图</a>
+    <h1 class="title"></h1>
+    <p class="description"></p>
+    <p class="namespace"></p>
+    <p class="constructor"></p>
+    <h2>语法</h2>
+    <h4>参数</h4>
+    <div class="params"></div>
+    <br />
+    <div class="returns"></div>
+</body>
+</html>

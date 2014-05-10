@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <script src="scripts/main.js"></script>
+    <link rel="stylesheet" href="styles/content.css" />
+    <script>
+        window.onload = function () {
+            loadFile("../Code/" + (getQueryString("class").replace("gang", "/") || "Main") + ".json", true, null, function (str) {
+                var obj = JSON.parse(str);
+                setValueFromClass("title", obj.name + "类");
+                setValueFromClass("description", obj.description);
+                setValueFromClass("namespace", "命名空间:<span>" + (obj.namespace ? obj.namespace : "此类为根命名空间定义") + "</span>");
+                setValueFromClass("extends", obj.extends ? "<span class='tips'>继承自</span>:<span class='name'>" + obj.extends + "</span>" : "此类不继承自任何其他类");
+                if (obj.funs.length) {
+                    var fun = null;
+                    var str = "<tr class='title'><th style='width:50%;'>名称</th><th>说明</th></tr>";
+                    for (var i = 0; i < obj.funs.length; i++) {
+                        fun = obj.funs[i];
+                        var ps = "";
+                        for (var n = 0; n < fun.params.length; n++) {
+                            ps += fun.params[n].type + (fun.params.length == n + 1 ? "" : ", ");
+                        }
+                        str += "<tr><td><a href='function.html?namespace=" + (obj.namespace ? obj.namespace + "." : "") + obj.name + "&data=" + escape(JSON.stringify(fun)) + "'>" + fun.name + "(" + ps + ")</a></td><td>" + fun.description + "</td></tr>";
+                    }
+                    setValueFromClass("function", str);
+                    document.getElementsByClassName("function")[0].style.display = "table";
+                }
+
+                if (obj.attributes.length) {
+                    var attr = null;
+                    var str = "<tr class='title'><th style='width:50%;'>名称</th><th>说明</th></tr>";
+                    for (var i = 0; i < obj.attributes.length; i++) {
+                        attr = obj.attributes[i];
+                        str += "<tr><td><a href='attribute.html?namespace=" + (obj.namespace ? obj.namespace + "." : "") + obj.name + "&data=" + escape(JSON.stringify(attr)) + "'>" + attr.name + "</a></td><td>" + attr.description + "</td></tr>";
+                    }
+                    setValueFromClass("field", str);
+                    document.getElementsByClassName("field")[0].style.display = "table";
+                }
+            });
+        };
+
+        function setValueFromClass(className, value) {
+            var el = document.getElementsByClassName(className)[0];
+            el.innerHTML = value;
+            el.style.display = "block";
+        }
+    </script>
+</head>
+<body>
+    <h1 class="title"></h1>
+    <p class="description"></p>
+    <p class="namespace"></p>
+    <p class="extends"></p>
+    <h2>方法</h2>
+    <table class="function"></table>
+    <br />
+    <h2>字段</h2>
+    <table class="field"></table>
+</body>
+</html>
