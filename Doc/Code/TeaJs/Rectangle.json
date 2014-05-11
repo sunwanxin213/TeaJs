@@ -1,0 +1,217 @@
+﻿{
+	"name": "Rectangle",
+	"namespace": "TeaJs",
+	"extends": null,
+	"constructor": true,
+	"description": "矩形类",
+	"funs": [
+        {
+        	"name": "构造函数",
+        	"description": "矩形构造函数，new时触发",
+        	"params": [],
+        	"returns": {
+        		"type": "TeaJs.Rectangle",
+        		"description": "矩形对象"
+        	}
+        },
+        {
+        	"name": "构造函数",
+        	"description": "矩形构造函数，new时触发",
+        	"params": [
+                {
+                	"name": "x",
+                	"type": "Number",
+                	"description": "矩形X坐标",
+                	"optional": false
+                },
+                {
+                	"name": "y",
+                	"type": "Number",
+                	"description": "矩形Y坐标",
+                	"optional": false
+                },
+                {
+                	"name": "width",
+                	"type": "Number",
+                	"description": "矩形宽度",
+                	"optional": false
+                },
+                {
+                	"name": "height",
+                	"type": "Number",
+                	"description": "矩形高度",
+                	"optional": false
+                }
+        	],
+        	"returns": {
+        		"type": "TeaJs.Rectangle",
+        		"description": "矩形对象"
+        	}
+        },
+        {
+        	"name": "构造函数",
+        	"description": "矩形构造函数，new时触发",
+        	"params": [
+                {
+                	"name": "r",
+                	"type": "TeaJs.Rectangle",
+                	"description": "矩形对象",
+                	"optional": false
+                }
+        	],
+        	"returns": {
+        		"type": "TeaJs.Rectangle",
+        		"description": "矩形对象"
+        	}
+        },
+        {
+        	"name": "clone",
+        	"description": "克隆该矩形对象",
+        	"params": [],
+        	"returns": {
+        		"type": "TeaJs.Rectangle",
+        		"description": "克隆出来的矩形对象"
+        	}
+        },
+        {
+        	"name": "intersects",
+        	"description": "判断矩形是否相交",
+        	"params": [
+                {
+                	"name": "rect",
+                	"type": "TeaJs.Rectangle",
+                	"description": "矩形对象",
+                	"optional": false
+                }
+        	],
+        	"returns": {
+        		"type": "Boolean",
+        		"description": "是否相交"
+        	}
+        },
+        {
+        	"name": "intersects",
+        	"description": "判断矩形是否相交",
+        	"params": [
+                {
+                	"name": "x",
+                	"type": "Number",
+                	"description": "X坐标",
+                	"optional": false
+                },
+				{
+					"name": "y",
+					"type": "Number",
+					"description": "Y坐标",
+					"optional": false
+				}
+        	],
+        	"returns": {
+        		"type": "Boolean",
+        		"description": "是否相交"
+        	}
+        },
+        {
+        	"name": "intersects",
+        	"description": "判断矩形是否相交",
+        	"params": [
+                {
+                	"name": "x",
+                	"type": "Number",
+                	"description": "X坐标",
+                	"optional": false
+                },
+				{
+					"name": "y",
+					"type": "Number",
+					"description": "Y坐标",
+					"optional": false
+				},
+                {
+                	"name": "w",
+                	"type": "Number",
+                	"description": "宽度",
+                	"optional": false
+                },
+				{
+					"name": "h",
+					"type": "Number",
+					"description": "高度",
+					"optional": false
+				}
+        	],
+        	"returns": {
+        		"type": "Boolean",
+        		"description": "是否相交"
+        	}
+        },
+        {
+        	"name": "offset",
+        	"description": "矩形偏移",
+        	"params": [
+                {
+                	"name": "x",
+                	"type": "Number",
+                	"description": "X坐标",
+                	"optional": false
+                },
+                {
+                	"name": "y",
+                	"type": "Number",
+                	"description": "Y坐标",
+                	"optional": false
+                },
+                {
+                	"name": "w",
+                	"type": "Number",
+                	"description": "宽度",
+                	"optional": false
+                },
+                {
+                	"name": "h",
+                	"type": "Number",
+                	"description": "高度",
+                	"optional": false
+                }
+        	],
+        	"returns": {
+        		"type": "TeaJs.Rectangle",
+        		"description": "矩形对象"
+        	}
+        }
+	],
+	"attributes": [
+        {
+        	"name": "x",
+        	"type": "Number",
+        	"description": "矩形X坐标",
+        	"canGet": true,
+        	"canSet": true,
+        	"default": 0
+        },
+        {
+        	"name": "y",
+        	"type": "Number",
+        	"description": "矩形Y坐标",
+        	"canGet": true,
+        	"canSet": true,
+        	"default": 0
+        },
+        {
+        	"name": "width",
+        	"type": "Number",
+        	"description": "矩形宽度",
+        	"canGet": true,
+        	"canSet": true,
+        	"default": 1
+        },
+        {
+        	"name": "height",
+        	"type": "Number",
+        	"description": "矩形高度",
+        	"canGet": true,
+        	"canSet": true,
+        	"default": 1
+        }
+	]
+}

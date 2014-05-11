@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="styles/content.css" />
     <script>
         window.onload = function () {
-            loadFile("../Code/" + (getQueryString("class").replace("gang", "/") || "Main") + ".json", true, null, function (str) {
+            loadFile("../Code/" + (getQueryString("class").replace("gang", "/") || "Main") + ".json?v" + (+new Date()), true, null, function (str) {
                 var obj = JSON.parse(str);
                 setValueFromClass("title", obj.name + "类");
                 setValueFromClass("description", obj.description);
                 setValueFromClass("namespace", "命名空间:<span>" + (obj.namespace ? obj.namespace : "此类为根命名空间定义") + "</span>");
                 setValueFromClass("extends", obj.extends ? "<span class='tips'>继承自</span>:<span class='name'>" + obj.extends + "</span>" : "此类不继承自任何其他类");
+                setValueFromClass("constructor", (obj.constructor ? "该类为构造器，需要new后使用" : "该类不是构造器，可直接调用"));
                 if (obj.funs.length) {
                     var fun = null;
                     var str = "<tr class='title'><th style='width:50%;'>名称</th><th>说明</th></tr>";
@@ -53,6 +54,7 @@
     <p class="description"></p>
     <p class="namespace"></p>
     <p class="extends"></p>
+    <p class="constructor"></p>
     <h2>方法</h2>
     <table class="function"></table>
     <br />

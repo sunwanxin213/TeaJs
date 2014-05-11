@@ -12,7 +12,6 @@
             setValueFromClass("title", obj.name + "方法");
             setValueFromClass("description", obj.description);
             setValueFromClass("namespace", "命名空间:<span>" + getQueryString("namespace") + "</span>");
-            setValueFromClass("constructor", obj.constructor ? "该方法为构造器，需要new后使用" : "该方法不是构造器，可直接调用");
             if (!obj.params.length) setValueFromClass("params", "该方法没有参数。");
             else {
                 var p = null;
@@ -47,7 +46,6 @@
     <h1 class="title"></h1>
     <p class="description"></p>
     <p class="namespace"></p>
-    <p class="constructor"></p>
     <h2>语法</h2>
     <h4>参数</h4>
     <div class="params"></div>

@@ -23,7 +23,7 @@
     </style>
     <script>
         function change(url) {
-            document.getElementById("content").src = "class.html?class=" + url.replace("/", "gang");
+            document.getElementById("content").src = "class.html?class=" + url.replace("/", "gang") + "&v" + (+new Date());
         }
     </script>
 </head>
@@ -32,6 +32,8 @@
         <a href="javascript:change('Main');">TeaJs</a><br />
         <a href="javascript:change('TeaJs/AudioContext');">....AudioContext</a><br />
         <a href="javascript:change('TeaJs/C2Effect');">....C2Effect</a><br />
+        <a href="javascript:change('TeaJs/Loader');">....Loader</a><br />
+        <a href="javascript:change('TeaJs/Rectangle');">....Rectangle</a><br />
     </div>
     <iframe id="content" src="class.html" border="0" style="border: 0; float: left; width: 80%; height: 100%;"></iframe>
 </body>

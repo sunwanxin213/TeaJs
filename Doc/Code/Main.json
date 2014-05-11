@@ -2,12 +2,12 @@
     "name": "TeaJs",
     "namespace": "",
     "extends": null,
+	"constructor": false,
     "description": "TeaJs主入口",
     "funs": [
         {
             "name": "TeaJs",
             "description": "初始化TeaJs框架",
-            "constructor": false,
             "params": [
                 {
                     "name": "path",
@@ -33,7 +33,6 @@
         {
             "name": "getQueryString",
             "description": "获取页面参数",
-            "constructor": false,
             "params": [
                 {
                     "name": "name",
@@ -50,7 +49,7 @@
         {
             "name": "loadFile",
             "description": "加载文件",
-            "constructor": false,
+            
             "params": [
                 {
                     "name": "url",
@@ -87,7 +86,7 @@
         },
         {
             "name": "loadScript",
-            "constructor": false,
+            
             "description": "加载脚本",
             "params": [
                 {

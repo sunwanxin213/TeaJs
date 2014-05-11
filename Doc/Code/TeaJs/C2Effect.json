@@ -2,39 +2,35 @@
     "name": "C2Effect",
     "namespace": "TeaJs",
     "extends": null,
+	"constructor": true,
     "description": "Canvas2D渲染器效果类",
     "funs": [
         {
             "name": "begin",
             "description": "开始进行效果处理",
-            "constructor": false,
             "params": [],
             "returns": null
         },
         {
             "name": "process",
             "description": "处理画布",
-            "constructor": false,
             "params": [],
             "returns": null
         },
         {
             "name": "end",
             "description": "结束效果处理",
-            "constructor": false,
             "params": [],
             "returns": null
         },
         {
             "name": "destroy",
             "description": "销毁插件对象",
-            "constructor": false,
             "params": [],
             "returns": null
         },
         {
             "name": "convolutionMatrix",
-            "constructor": false,
             "description": "计算卷积矩阵",
             "params": [
                 {
