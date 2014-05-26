@@ -13,8 +13,37 @@ void function (TeaJs) {
 
         var _this = this;
 
+        // 画布宽度
+        var width = 0;
+        Object.defineProperty(this, "width", {
+            get: function () { return width; },
+            set: function (value) {
+                width = value | 0;
+                _this.canvas.width = width;
+                if (width && height) ratio = width / height;
+            }
+        });
+
+        // 画布高度
+        var height = 0;
+        Object.defineProperty(this, "height", {
+            get: function () { return height; },
+            set: function (value) {
+                height = value | 0;
+                _this.canvas.height = height;
+                if (width && height) ratio = width / height;
+            }
+        });
+
         // 宽高比
-        this.ratio = this.width / this.height;
+        var ratio = 0;
+        Object.defineProperty(this, "ratio", {
+            get: function () { return ratio; }
+        });
+
+        // 设置大小
+        this.resize(this.canvas.width, this.canvas.height);
+        setCanvasStyle(this.canvas);
 
         // 禁止右键菜单
         this.canvas.oncontextmenu = function () { return false; };
@@ -55,11 +84,6 @@ void function (TeaJs) {
 
         this.rendererMode = rendererMode;
         this.canvas = canvas;
-
-        this.width = canvas.width,
-        this.height = canvas.height;
-
-        setCanvasStyle(this.canvas);
     });
 
     constructor.add([HTMLElement, String, Array], function (canvas, rendererMode, contextList) {
@@ -72,11 +96,6 @@ void function (TeaJs) {
         this.rendererMode = rendererMode;
         this.canvas = canvas;
         this.context = null;
-
-        this.width = canvas.width,
-        this.height = canvas.height;
-
-        setCanvasStyle(this.canvas);
 
         // 尝试获取上下文
         for (var i = 0; i < contextList.length && !this.context; i++) {
@@ -102,10 +121,11 @@ void function (TeaJs) {
         /// <param name="w" type="Number">宽度</param>
         /// <param name="h" type="Number">高度</param>
 
-        var c = renderer.canvas;
+        var c = this.canvas;
 
         this.width = c.width = w;
         this.height = c.height = h;
+        window.onresize && window.onresize();
     };
 
     function autoSize(renderer, isAuto) {
