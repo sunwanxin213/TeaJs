@@ -115,30 +115,30 @@ void function (TeaJs) {
 
         // 绑定触摸按下事件
         obj.addEventListener('touchstart', function (e) {
-            if (event && event.preventDefault) {
+            if (typeof (event) != "undefined" && event.preventDefault) {
                 event.preventDefault();
             } else {
-                window.event.returnValue = false;
+                e.stopPropagation();
             }
             _this.setStatus(e, true);
         }, false);
 
         // 绑定触摸松开事件
         obj.addEventListener('touchend', function (e) {
-            if (event && event.preventDefault) {
+            if (typeof (event) != "undefined" && event.preventDefault) {
                 event.preventDefault();
             } else {
-                window.event.returnValue = false;
+                e.stopPropagation();
             }
             _this.setStatus(e, false);
         }, false);
 
         // 绑定触摸移动事件
         obj.addEventListener('touchmove', function (e) {
-            if (event && event.preventDefault) {
+            if (typeof (event) != "undefined" && event.preventDefault) {
                 event.preventDefault();
             } else {
-                window.event.returnValue = false;
+                e.stopPropagation();
             }
             _this.setLocation(e);
         }, false);

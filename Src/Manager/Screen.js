@@ -26,28 +26,37 @@ void function () {
     // 屏幕管理器原型对象
     var s = Screen.prototype;
 
-    s.lockDirection = function (direction) {
-        /// <summary>锁定屏幕方向</summary>
-        /// <param name="direction" type="Number">要锁定的方向&#10;0为不锁定&#10;1为横屏&#10;2为竖屏</param>
-        /// <returns type="Boolean">是否锁定成功</returns>
+    // 要锁定的屏幕方向
+    s.lockDirection = 0;
 
-        if (!screen.lockOrientation || !screen.unlockOrientation) return false;
-        switch (direction) {
+    function changeOrientation(e) {
+        /// <summary>锁定屏幕方向</summary>
+
+        if (!screen.lockOrientation || !screen.unlockOrientation) return;
+        if (TeaJs.isDebug) {
+            console.warn("没有进入全屏状态前无法锁定屏幕方向");
+        }
+        switch (s.lockDirection) {
             case 1:
                 // 锁定为横屏
-                screen.lockOrientation(["landscape-primary", "landscape-secondary"]);
+                screen.lockOrientation("landscape-primary", "landscape-secondary");
                 break;
             case 2:
                 // 锁定为竖屏
-                screen.lockOrientation(["portrait-primary", "portrait-secondary"]);
+                screen.lockOrientation("portrait-primary", "portrait-secondary");
                 break;
             case 0:
                 // 解锁屏幕方向
                 screen.unlockOrientation();
                 break;
         }
-        return true;
-    };
+    }
+
+    // 绑定屏幕方向改变事件
+    var orientationEvents = ["orientationchange", "mozorientationchange", "msorientationchange", "webkitorientationchange"];
+    for (var i = 0; i < orientationEvents.length; i++) {
+        window.screen["on" + orientationEvents[i]] = changeOrientation;
+    }
 
     s.capture = function (canvas, type) {
         /// <summary>截取游戏屏幕</summary>
@@ -78,7 +87,7 @@ void function () {
 
         element = element || document.documentElement;
         if (!element.requestFullscreen) return;
-        this.fsElement = element;
+        this.fsElement = screen.fullElement = element;
         this.sourceSize.width = element.style.width;
         this.sourceSize.height = element.style.height;
         element.style.width = screen.width + "px";
@@ -92,7 +101,7 @@ void function () {
         if (!this.fsElement) return;
         this.fsElement.style.width = this.sourceSize.width;
         this.fsElement.style.height = this.sourceSize.height;
-        this.fsElement = null;
+        this.fsElement = screen.fullElement = null;
         document.exitFullscreen();
     }
 

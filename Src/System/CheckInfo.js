@@ -89,10 +89,8 @@
     void function checkNetwork() {
         /// <summary>检查网络</summary>
 
-        var p = window.performance || window.msPerformance || window.webkitPerformance || window.mozPerformance;
-
-        if (p && p.navigation) {
-            switch (p.navigation.type) {
+        if (navigator.connection) {
+            switch (navigator.connection.type) {
                 case 1:
                     tci.network = "ethernet";
                     break;
